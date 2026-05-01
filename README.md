@@ -13,7 +13,7 @@
 ## Repository Structure
 
 ```
-GroupX/
+Group2/
 ├── README.md                  ← this file
 ├── code/
 │   ├── features/              ← Period 5: per-student feature extraction scripts
@@ -54,8 +54,8 @@ GroupX/
 | Student | Dataset | Source |
 |---|---|---|
 | Odeliya | flaws.cloud CloudTrail Logs (1.9M events, real attackers) | https://summitroute.com/downloads/flaws_cloudtrail_logs.tar |
-| Alin | CERT Insider Threat Dataset v6.2 | https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=508099 |
-| Lior | TBD | TBD |
+| Alin | TBD | TBD |
+| Lior | BOTS V3 | https://github.com/splunk/botsv3 |
 
 > Data files are NOT committed to this repository. See `data/README.md` for download instructions.
 
