@@ -1,84 +1,82 @@
-# AI-Driven Intrusion Detection - Workshop Project
-## Tel Aviv University | Group 2
+# Host-Based Behavioral Anomaly Detection on Linux Systems
+## Tel Aviv University | Workshop on Intrusion Detection Using ML Techniques | Group 2
 
-**Attack Category:** IAM Privilege Abuse & Cloud Lateral Movement
+**Attack category:** Linux host-based privilege escalation, targeting MITRE ATT&CK
+T1548 (Abuse Elevation Control Mechanism: Setuid/Setgid), T1059 (Command and Scripting
+Execution), T1222 (File/Directory Permissions Modification), and T1595 (Active Scanning),
+evaluated on two independent telemetry sources: **CAM-LDS** and **CasinoLimit**.
 
-**Group Members:**
-- Alin Ioshevsky (alinl@mail.tau.ac.il)
-- Lior Pernik (liorpernik@mail.tau.ac.il)
-- Odeliya Charitonova (odeliyac@mail.tau.ac.il)
+**Group members:**
+- Alin Loshevsky ([alinl@mail.tau.ac.il](mailto:alinl@mail.tau.ac.il))
+- Lior Pernik ([liorpernik@mail.tau.ac.il](mailto:liorpernik@mail.tau.ac.il))
+- Odeliya Charitonova ([odeliyac@mail.tau.ac.il](mailto:odeliyac@mail.tau.ac.il))
 
 ---
 
-## Repository Structure
+## Repository structure
 
 ```
-Group2/
-├── README.md                  ← this file
-├── code/
-│   ├── features/              ← Period 5: per-student feature extraction scripts
-│   └── final/                 ← Period 8: final codebase + run_all.sh
+.
+├── README.md
+├── requirements.txt
+├── .gitignore
 ├── data/
-│   └── README.md              ← dataset download instructions (data not committed)
-├── deliverables/
-│   ├── 01_group_and_incidents.md
-│   ├── 02_paper_analyses.zip  ← Period 2
-│   ├── 03_midsemester_package.zip ← Period 3 (mid-semester gate)
-│   ├── 04_EDA_and_feature_spec.zip ← Period 4
-│   ├── 05_feature_extraction_spec.md ← Period 5
-│   ├── 06_crossdataset_summary.pdf ← Period 6 (end-of-semester)
-│   ├── 07_error_and_ensemble.zip ← Period 7
-│   └── 08_final_report.pdf   ← Period 8 (final)
-└── experiments/
-    └── pipelines/             ← Period 6: per-student pipeline folders
+│   ├── dataset1_features.csv       # CAM-LDS, process-level features (label col: `label`)
+│   └── casino_process_level_ds.csv # CasinoLimit, process-level (label col: `is_privesc`)
+├── docs/
+│   ├── milestone1/         # Individual attack profiling, breach analysis, paper/dataset review
+│   ├── milestone2/         # EDA, feature engineering, model selection report + dataset build notes
+│   └── milestone3/         # Pipeline implementation & evaluation — changelog + experiment log
+├── milestone2_pipeline/
+│   ├── scripts/            # unified_eda.py, unified_validation.py, cross_dataset_harmonization.py
+│   │   ├── caml/            # CAM-LDS raw-log extraction (reads data/raw/, which is not committed)
+│   │   └── dataset/         # CasinoLimit feature build
+│   ├── run_pipeline.sh     # SLURM: full Ch3/4/5 pipeline, both datasets
+│   └── results/            # EDA, validation, and cross-dataset harmonization outputs
+└── milestone3_pipeline/
+    ├── src/                 # config.py, ingestion.py, models.py, train_eval.py, etc.
+    ├── run_scripts/         # SLURM job scripts (headline CV, sensitivity, operating curve, error analysis)
+    └── results/
+        ├── current/         # Latest results (post-fix, regenerated CAM-LDS v3)
+        └── archive/         # Pre-fix baseline results, kept for before/after comparison
 ```
 
----
+## Data
 
-## Attack Category
+Three processed feature CSVs are committed directly in `data/` (original and regenerated cam-lds, casino)(~15MB combined) — they're
+the direct `--input` to every Milestone 2 and Milestone 3 script, so anyone cloning this
+repo can run the pipelines immediately without regenerating anything.
 
-**IAM Privilege Abuse & Cloud Lateral Movement** covers initial privilege escalation, lateral movement across cloud resources, and persistence via IAM misconfigurations in AWS and Azure environments.
+| Dataset | Source | Rows | Label col |
+|---|---|---|---|
+| CAM-LDS (`dataset1_features.csv`) | Zenodo record 18861762, 28 scenario captures | 90,805 | `label` |
+| CasinoLimit (`casino_process_level_ds.csv`) | internal build | 91,692 | `is_privesc` |
 
-**Primary MITRE ATT&CK techniques (IaaS/SaaS matrix):**
-- T1548 - Abuse Elevation Control Mechanism
-- T1098 - Account Manipulation
-- T1078.004 - Valid Accounts: Cloud Accounts
-- T1550.001 - Use Alternate Authentication Material: Application Access Token
+## Quick start
 
-**Primary telemetry:** AWS CloudTrail audit logs, Azure AD sign-in/audit logs
+```bash
+# Milestone 2 — EDA + validation + cross-dataset harmonization, both datasets
+sbatch milestone2_pipeline/run_pipeline.sh
 
----
+# Milestone 3 — headline model CV, both datasets, all 4 models
+sbatch milestone3_pipeline/run_scripts/run_milestone3.sh
+```
 
-## Datasets
+**Note:** several scripts have a hardcoded conda interpreter path from the original
+account. Update the `PYTHON=` line in each `.sh` before submitting under a different
+account.
 
-| Student | Dataset | Source |
-|---|---|---|
-| Odeliya | flaws.cloud CloudTrail Logs (1.9M events, real attackers) | https://summitroute.com/downloads/flaws_cloudtrail_logs.tar |
-| Alin | TBD | TBD |
-| Lior | BOTS V3 | https://github.com/splunk/botsv3 |
+## Current state
 
-> Data files are NOT committed to this repository. See `data/README.md` for download instructions.
+See `docs/milestone3/CHANGELOG.md` for the full decision log (every fix, experiment,
+and finding) and `docs/milestone3/experiment_log.html` for a summary.
 
----
+- **Milestone 1**: complete — individual attack/breach/paper/dataset analyses in `docs/milestone1/`.
+- **Milestone 2**: complete — report, EDA/validation/harmonization scripts and outputs.
+- **Milestone 3**: headline pipeline, sensitivity analysis, operating-curve derivation, and
+  cross-dataset evaluation done. In progress: sample-level error analysis (CasinoLimit vs.
+  regenerated CAM-LDS). 
 
-## Reproducibility
-
-- Python version: 3.12
-- Dependency file: `requirements.txt` (to be added in Period 5)
-- All random seeds must be fixed and documented in `model_configs.json` per student
-- Final demo must run end-to-end in under 15 minutes on sampled data via `code/final/run_all.sh`
-
----
-
-## Milestones
-
-| Milestone | Due | Deliverable |
-|---|---|---|
-| Period 1 | Week 2 | `01_group_and_incidents.md` + this README, tag v0.1 |
-| Period 2 | Week 4 | `02_paper_analyses.zip` (3 individual PDFs + feature map CSV) |
-| **Mid-semester** | **Week 6** | `03_midsemester_package.zip` (breach analyses + dataset commitments) |
-| Period 4 | Week 8 | `04_EDA_and_feature_spec.zip` (3 EDA notebooks + harmonized spec) |
-| Period 5 | Week 10 | `code/features/` (3 extraction scripts + sample CSVs) |
-| **End-of-semester** | **Week 12** | `experiments/pipelines.zip` + `06_crossdataset_summary.pdf` |
-| Period 7 | Week 14 | `07_error_and_ensemble.zip` + ensemble design + LLM plan |
-| **Final** | **Week 18** | `GroupX/final_release.zip` (report + code + slides + demo video) |
+  Not yet started:
+- hybrid cascade (Isolation Forest → supervised)
+- LLM triage layer (Step 8 capstone)
