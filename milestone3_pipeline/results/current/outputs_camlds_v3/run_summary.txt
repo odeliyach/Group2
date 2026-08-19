@@ -1,0 +1,1 @@
+CAM-LDS / cnn: F1=0.7917+/-0.1557  AUROC=0.8967+/-0.0859  Precision=0.8613  Recall=0.7456  FPR=0.0627

@@ -1,0 +1,1 @@
+CasinoLimit / cnn: F1=0.6218+/-0.2724  AUROC=0.8966+/-0.1320  Precision=0.7555  Recall=0.6731  FPR=0.2633

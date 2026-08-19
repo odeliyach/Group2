@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Milestone 3 :: Detection Results</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E14;
+    --surface:#12161F;
+    --surface-raised:#171C27;
+    --border:#232938;
+    --border-soft:#1A2030;
+    --text:#E8EBF2;
+    --text-muted:#8B93A7;
+    --text-faint:#5A6273;
+    --good:#3ECF8E;
+    --good-dim:#1D4A38;
+    --warn:#E8A33D;
+    --warn-dim:#4A3A1A;
+    --bad:#F0555A;
+    --bad-dim:#4A2226;
+    --accent:#5FB3D9;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+    --display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{max-width:960px; margin:0 auto; padding:0 24px 96px;}
+
+  /* ---------- Header ---------- */
+  header{
+    border-bottom:1px solid var(--border);
+    padding:28px 0 24px;
+    margin-bottom:40px;
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px; height:7px;
+    background:var(--good);
+    border-radius:50%;
+    box-shadow:0 0 8px var(--good);
+    display:inline-block;
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(28px,4vw,40px);
+    letter-spacing:-0.02em;
+    margin-bottom:10px;
+  }
+  .subhead{color:var(--text-muted); font-size:15px; max-width:620px;}
+
+  .hero-stat{
+    margin-top:28px;
+    background:linear-gradient(135deg, var(--bad-dim), transparent 70%), var(--surface);
+    border:1px solid var(--border);
+    border-left:3px solid var(--bad);
+    border-radius:8px;
+    padding:20px 24px;
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .hero-stat .num{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:34px;
+    color:var(--bad);
+    letter-spacing:-0.02em;
+  }
+  .hero-stat .desc{color:var(--text-muted); font-size:14px; max-width:520px;}
+  .hero-stat .desc b{color:var(--text); font-weight:500;}
+
+  /* ---------- Section scaffolding ---------- */
+  section{margin-bottom:56px;}
+  .section-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+    margin-bottom:8px;
+  }
+  h2{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:22px;
+    margin-bottom:6px;
+    letter-spacing:-0.01em;
+  }
+  .section-intro{color:var(--text-muted); font-size:14.5px; margin-bottom:22px; max-width:680px;}
+
+  /* ---------- Dataset cards ---------- */
+  .ds-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:640px){.ds-grid{grid-template-columns:1fr;}}
+  .ds-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px;
+  }
+  .ds-card .ds-name{font-family:var(--display); font-weight:600; font-size:17px; margin-bottom:14px;}
+  .ds-row{display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border-soft); font-size:13.5px;}
+  .ds-row:last-child{border-bottom:none;}
+  .ds-row .k{color:var(--text-muted);}
+  .ds-row .v{font-family:var(--mono); color:var(--text); font-weight:500;}
+
+  /* ---------- Results table ---------- */
+  .results-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.5px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .results-table th{
+    text-align:left;
+    font-family:var(--mono);
+    font-weight:500;
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+    padding:12px 14px;
+    background:var(--surface-raised);
+    border-bottom:1px solid var(--border);
+  }
+  .results-table td{
+    padding:11px 14px;
+    border-bottom:1px solid var(--border-soft);
+    font-family:var(--mono);
+  }
+  .results-table tr:last-child td{border-bottom:none;}
+  .results-table .model-name{font-family:var(--body); font-weight:500; color:var(--text);}
+  .ds-tag{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:10px;
+    padding:2px 7px;
+    border-radius:4px;
+    letter-spacing:.04em;
+    margin-bottom:2px;
+  }
+  .tag-camlds{background:#1A2A3A; color:#7FC4E8;}
+  .tag-casino{background:#2A1F3A; color:#C79FE8;}
+
+  .metric-bar-cell{display:flex; align-items:center; gap:8px; min-width:120px;}
+  .metric-bar-track{flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;}
+  .metric-bar-fill{height:100%; border-radius:3px;}
+  .fill-good{background:var(--good);}
+  .fill-warn{background:var(--warn);}
+  .fill-bad{background:var(--bad);}
+  .metric-val{font-size:12.5px; color:var(--text-muted); min-width:38px; text-align:right;}
+
+  /* ---------- Mechanism cards ---------- */
+  .mech-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:640px){.mech-grid{grid-template-columns:1fr;}}
+  .mech-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px;
+    border-top:3px solid var(--border);
+  }
+  .mech-card.tier-good{border-top-color:var(--good);}
+  .mech-card.tier-warn{border-top-color:var(--warn);}
+  .mech-card.tier-bad{border-top-color:var(--bad);}
+  .mech-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+  .mech-name{font-family:var(--display); font-weight:600; font-size:16px;}
+  .mech-verdict{font-family:var(--mono); font-size:11px; padding:3px 9px; border-radius:20px; letter-spacing:.03em;}
+  .verdict-good{background:var(--good-dim); color:var(--good);}
+  .verdict-warn{background:var(--warn-dim); color:var(--warn);}
+  .verdict-bad{background:var(--bad-dim); color:var(--bad);}
+  .mech-card p{font-size:13.5px; color:var(--text-muted); margin-bottom:8px;}
+  .mech-card p:last-child{margin-bottom:0;}
+  .mech-card b{color:var(--text); font-weight:500;}
+  .mech-card code{font-family:var(--mono); font-size:12.5px; background:var(--surface-raised); padding:1px 5px; border-radius:4px; color:var(--accent);}
+
+  /* ---------- Diverging chart (signature element) ---------- */
+  .chart-panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:28px 24px 20px;
+  }
+  .chart-legend{display:flex; gap:20px; margin-bottom:24px; font-size:12px; color:var(--text-muted); flex-wrap:wrap;}
+  .chart-legend span{display:flex; align-items:center; gap:6px;}
+  .legend-dot{width:9px; height:9px; border-radius:2px; display:inline-block;}
+
+  .chance-axis{
+    position:relative;
+    height:18px;
+    margin:0 0 6px;
+  }
+  .chance-axis .tick{
+    position:absolute;
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--text-faint);
+    transform:translateX(-50%);
+  }
+  .chance-line-label{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--accent);
+    top:-2px;
+  }
+
+  .diverge-row{
+    display:grid;
+    grid-template-columns:150px 1fr;
+    align-items:center;
+    gap:14px;
+    padding:10px 0;
+    border-bottom:1px solid var(--border-soft);
+  }
+  .diverge-row:last-child{border-bottom:none;}
+  .diverge-label{font-family:var(--body); font-weight:500; font-size:13px; color:var(--text);}
+  .diverge-label .sub{display:block; font-family:var(--mono); font-size:10.5px; color:var(--text-faint); font-weight:400; margin-top:2px;}
+  .diverge-track{
+    position:relative;
+    height:22px;
+    background:
+      linear-gradient(90deg, transparent 49.6%, var(--border) 49.6%, var(--border) 50.4%, transparent 50.4%),
+      var(--surface-raised);
+    border-radius:5px;
+    overflow:visible;
+  }
+  .diverge-bar{
+    position:absolute;
+    top:3px; bottom:3px;
+    border-radius:3px;
+  }
+  .diverge-val{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    font-family:var(--mono);
+    font-size:11px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+
+  .chart-footnote{margin-top:18px; font-size:12.5px; color:var(--text-faint); line-height:1.6;}
+
+  /* ---------- Asymmetry explainer ---------- */
+  .asym-panel{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:18px;
+    align-items:center;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:22px;
+  }
+  @media(max-width:640px){.asym-panel{grid-template-columns:1fr;}}
+  .asym-side{padding:6px;}
+  .asym-side .label{font-family:var(--mono); font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;}
+  .asym-side .headline{font-family:var(--display); font-weight:600; font-size:15px; margin-bottom:8px;}
+  .asym-side p{font-size:13px; color:var(--text-muted);}
+  .asym-arrow{font-family:var(--mono); color:var(--text-faint); font-size:22px; text-align:center;}
+
+  /* ---------- Root cause section ---------- */
+  .rootcause-panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:24px;
+  }
+  .code-block{
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:16px 18px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text-muted);
+    overflow-x:auto;
+    margin:16px 0;
+    line-height:1.7;
+  }
+  .code-block .kw{color:var(--accent);}
+  .code-block .cm{color:var(--text-faint); font-style:italic;}
+  .code-block .val{color:var(--warn);}
+
+  .consequence-flow{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:12px 18px;
+    margin-top:22px;
+    align-items:start;
+  }
+  @media(max-width:640px){.consequence-flow{grid-template-columns:1fr;}}
+  .flow-source{
+    grid-column:1 / -1;
+    background:var(--surface-raised);
+    border:1px solid var(--border);
+    border-left:3px solid var(--accent);
+    border-radius:8px;
+    padding:14px 16px;
+    font-size:13.5px;
+  }
+  .flow-source b{color:var(--accent);}
+  .flow-arrow-down{
+    grid-column:1 / -1;
+    text-align:center;
+    color:var(--text-faint);
+    font-family:var(--mono);
+    font-size:18px;
+    margin:2px 0;
+  }
+  .flow-branch{
+    background:var(--surface-raised);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:14px 16px;
+    font-size:13px;
+  }
+  .flow-branch .branch-tag{
+    font-family:var(--mono);
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--bad);
+    margin-bottom:6px;
+    display:block;
+  }
+  .flow-branch p{color:var(--text-muted); font-size:13px;}
+  .flow-branch b{color:var(--text);}
+
+  .contrast-strip{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--surface-raised);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:14px 18px;
+    margin-top:18px;
+    font-size:13px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .contrast-strip .cstat{font-family:var(--mono); font-weight:600;}
+  .contrast-strip .cstat.bad{color:var(--bad);}
+  .contrast-strip .cstat.good{color:var(--good);}
+
+  /* ---------- Footer / methodology ---------- */
+  .method-note{
+    background:var(--surface);
+    border:1px dashed var(--border);
+    border-radius:10px;
+    padding:18px 22px;
+    font-size:12.5px;
+    color:var(--text-faint);
+    line-height:1.8;
+  }
+  .method-note b{color:var(--text-muted); font-weight:500;}
+  footer{
+    border-top:1px solid var(--border);
+    padding-top:20px;
+    margin-top:56px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-faint);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Milestone 3 &middot; Step 7&ndash;8 &middot; Results Analysis</div>
+    <h1>Why the detection models scored the way they did</h1>
+    <p class="subhead">Within-dataset performance is strong for tree-based models. Cross-dataset generalization collapses &mdash; consistently, and for identifiable reasons. This page walks through both.</p>
+
+    <div class="hero-stat">
+      <span class="num">0.014</span>
+      <span class="desc"><b>Isolation Forest's cross-dataset AUROC</b> when trained on CAM&#8209;LDS and tested on CasinoLimit &mdash; <b>worse than random guessing</b> (0.500), and reproducible across 5 independent runs (&plusmn;0.007). This isn't noise. It's the headline finding of this milestone.</span>
+    </div>
+  </header>
+
+  <!-- ================= DATASETS ================= -->
+  <section>
+    <div class="section-label">01 &middot; Context</div>
+    <h2>Two environments, deliberately different</h2>
+    <p class="section-intro">Every result below only makes sense relative to how differently these two corpora are built. That difference is the whole story.</p>
+
+    <div class="ds-grid">
+      <div class="ds-card">
+        <div class="ds-name">CAM&#8209;LDS</div>
+        <div class="ds-row"><span class="k">Rows</span><span class="v">90,805</span></div>
+        <div class="ds-row"><span class="k">Attack rate</span><span class="v">54.0%</span></div>
+        <div class="ds-row"><span class="k">MITRE techniques</span><span class="v">19</span></div>
+        <div class="ds-row"><span class="k">Features</span><span class="v">20 / 20</span></div>
+      </div>
+      <div class="ds-card">
+        <div class="ds-name">CasinoLimit</div>
+        <div class="ds-row"><span class="k">Rows</span><span class="v">91,692</span></div>
+        <div class="ds-row"><span class="k">Attack rate</span><span class="v">17.1%</span></div>
+        <div class="ds-row"><span class="k">MITRE techniques</span><span class="v">4</span></div>
+        <div class="ds-row"><span class="k">Features</span><span class="v">17 / 20</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WITHIN-DATASET RESULTS ================= -->
+  <section>
+    <div class="section-label">02 &middot; Headline Results</div>
+    <h2>Within-dataset detection (5-fold CV, 15 repeats, F1-optimal thresholds capped at 5% FPR)</h2>
+    <p class="section-intro">Each model trained and tested on the <em>same</em> environment. This answers: "how good is this model at detecting attacks it was built for?"</p>
+
+    <table class="results-table">
+      <thead>
+        <tr><th>Model</th><th>Dataset</th><th>F1</th><th>AUROC</th><th>Precision</th><th>Recall</th><th>FPR</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="model-name">Random Forest</td>
+          <td><span class="ds-tag tag-camlds">CAM-LDS</span></td>
+          <td>0.855&nbsp;&plusmn;0.020</td>
+          <td><div class="metric-bar-cell"><div class="metric-bar-track"><div class="metric-bar-fill fill-good" style="width:94.1%"></div></div><span class="metric-val">0.941</span></div></td>
+          <td>0.912</td><td>0.815</td><td>0.109</td>
+        </tr>
+        <tr>
+          <td class="model-name">Random Forest</td>
+          <td><span class="ds-tag tag-casino">Casino</span></td>
+          <td>0.965&nbsp;&plusmn;0.038</td>
+          <td><div class="metric-bar-cell"><div class="metric-bar-track"><div class="metric-bar-fill fill-good" style="width:99.8%"></div></div><span class="metric-val">0.998</span></div></td>
+          <td>0.986</td><td>0.948</td><td>0.003</td>
+        </tr>
+        <tr>
+          <td class="model-name">XGBoost</td>
+          <td><span class="ds-tag tag-camlds">CAM-LDS</span></td>
+          <td>0.850&nbsp;&plusmn;0.034</td>
+          <td><div class="metric-bar-cell"><div class="metric-bar-track"><div class="metric-bar-fill fill-good" style="width:93.5%"></div></div><span class="metric-val">0.935</span></div></td>
+          <td>0.917</td><td>0.801</td><td>0.097</td>
+        </tr>
+        <tr>
+          <td class="model-name">XGBoost</td>
+          <td><span class="ds-tag tag-casino">Casino</span></td>
+          <td>0.919&nbsp;&plusmn;0.105</td>
+          <td><div class="metric-bar-cell"><div class="metric-bar-track"><div class="metric-bar-fill fill-good" style="width:99.5%"></div></div><span class="metric-val">0.995</span></div></td>
+          <td>0.984</td><td>0.876</td><td>0.003</td>
+        </tr>
+        <tr>
+          <td class="model-name">1D-CNN</td>
+          <td><span class="ds-tag tag-camlds">CAM-LDS</span></td>
+          <td>0.816&nbsp;&plusmn;0.043</td>
+          <td><div class="metric-bar-cell"><div class="metric-bar-track"><div class="metric-bar-fill fill-good" style="width:87.8%"></div></div><span class="metric-val">0.878</span></div></td>
+          <td>0.843</td><td>0.801</td><td>0.200</td>
+        </tr>
+        <tr>
+          <td class="model-name">1D-CNN</td>
+          <td><span class="ds-tag tag-casino">Casino</span></td>
+          <td>0.518&nbsp;&plusmn;0.369</td>
+          <td><div class="metric-bar-cell"><div class="metric-bar-track"><div class="metric-bar-fill fill-warn" style="width:90.1%"></div></div><span class="metric-val">0.901</span></div></td>
+          <td>0.562</td><td>0.724</td><td>0.459</td>
+        </tr>
+        <tr>
+          <td class="model-name">Isolation Forest</td>
+          <td><span class="ds-tag tag-camlds">CAM-LDS</span></td>
+          <td>0.221&nbsp;&plusmn;0.008</td>
+          <td><div class="metric-bar-cell"><div class="metric-bar-track"><div class="metric-bar-fill fill-bad" style="width:55.5%"></div></div><span class="metric-val">0.555</span></div></td>
+          <td>0.746</td><td>0.130</td><td>0.052</td>
+        </tr>
+        <tr>
+          <td class="model-name">Isolation Forest</td>
+          <td><span class="ds-tag tag-casino">Casino</span></td>
+          <td>0.773&nbsp;&plusmn;0.154</td>
+          <td><div class="metric-bar-cell"><div class="metric-bar-track"><div class="metric-bar-fill fill-good" style="width:82.1%"></div></div><span class="metric-val">0.821</span></div></td>
+          <td>0.950</td><td>0.677</td><td>0.007</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= WHY: MECHANISMS ================= -->
+  <section>
+    <div class="section-label">03 &middot; Why</div>
+    <h2>Four models, four different reasons for their score</h2>
+    <p class="section-intro">A score alone doesn't explain itself. Here's the mechanism behind each one, including a test that ruled out the wrong explanation.</p>
+
+    <div class="mech-grid">
+      <div class="mech-card tier-good">
+        <div class="mech-head"><span class="mech-name">Random Forest</span><span class="mech-verdict verdict-good">STRONG</span></div>
+        <p>Splits are chosen by <b>information gain over labeled data</b> &mdash; the model is directly optimizing for the boundary between benign and malicious. With explicit regularization (<code>max_depth=12</code>, <code>min_samples_split=10</code>) it beat even the Milestone&nbsp;2 baseline (AUROC 0.94 vs. 0.88 on CAM&#8209;LDS).</p>
+        <p>Its FPR (10&ndash;11% on CAM&#8209;LDS) reflects the 5% cap being honestly <em>unreachable</em> in some folds &mdash; the cap is a target, not a guarantee, once applied to genuinely unseen test data.</p>
+      </div>
+
+      <div class="mech-card tier-good">
+        <div class="mech-head"><span class="mech-name">XGBoost</span><span class="mech-verdict verdict-good">STRONG</span></div>
+        <p>Same paradigm as Random Forest &mdash; label-guided splits &mdash; with sequential boosting that targets the residual cases a single tree ensemble misses. Performance is essentially tied with RF, as expected for two members of the same supervised-tree family.</p>
+        <p>Needed a fix mid-project: without an explicit thread cap, it oversubscribed CPU cores under concurrent SLURM jobs and stalled at 2&ndash;3 of 15 repeats. Pinning <code>n_jobs=4</code> to match the actual allocation recovered full throughput.</p>
+      </div>
+
+      <div class="mech-card tier-warn">
+        <div class="mech-head"><span class="mech-name">1D&#8209;CNN</span><span class="mech-verdict verdict-warn">UNSTABLE</span></div>
+        <p>Mean performance is respectable, but Casino's F1 standard deviation (&plusmn;0.369) is enormous. Root cause: CasinoLimit is <b>99.6% duplicated</b> at the feature-vector level (only 356 unique patterns across 91k rows). The CNN's inner validation split occasionally lands on an unrepresentative slice of those few unique patterns, miscalibrating its decision threshold for that run.</p>
+        <p>A degenerate-split guard (retry until both classes have &ge;5 examples in validation) reduced &mdash; but did not eliminate &mdash; the collapse. This is a real, diagnosed failure mode, not unexplained noise.</p>
+      </div>
+
+      <div class="mech-card tier-bad">
+        <div class="mech-head"><span class="mech-name">Isolation Forest</span><span class="mech-verdict verdict-bad">PARADIGM MISMATCH</span></div>
+        <p>On CAM&#8209;LDS, AUROC sits at 0.555 &mdash; barely above chance. Isolation Forest assumes anomalies are a <b>sparse minority</b> in a dense normal population. CAM&#8209;LDS is 54% attack &mdash; there is no minority to isolate.</p>
+        <p><b>Ruled out an alternative explanation:</b> we tested fitting the model only on confirmed-benign rows ("novelty mode"), hypothesizing that a mixed training population was diluting its idea of "normal." AUROC didn't move (0.532 &rarr; 0.555, within noise). The failure is the <em>random-split isolation mechanism itself</em>, not what it's trained on &mdash; confirmed by the same model scoring 0.821 AUROC on Casino, where attack really is a 17% minority.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CROSS-DATASET (SIGNATURE) ================= -->
+  <section>
+    <div class="section-label">04 &middot; The Real Finding</div>
+    <h2>Cross-dataset transfer: train once, test on the other environment</h2>
+    <p class="section-intro">Every model above was evaluated on the environment it was trained for. Here, each model is trained on <b>one full dataset</b> and evaluated on the <b>other, entirely unseen</b> one &mdash; 5 repeats per direction, different random seeds. AUROC is threshold&#8209;independent: it measures whether the model's <em>ranking</em> of risk survived the move to a new environment at all.</p>
+
+    <div class="chart-panel">
+      <div class="chart-legend">
+        <span><span class="legend-dot" style="background:var(--bad)"></span>Below chance (ranking inverted)</span>
+        <span><span class="legend-dot" style="background:var(--warn)"></span>Near chance (no signal survived)</span>
+        <span><span class="legend-dot" style="background:var(--good)"></span>Above chance</span>
+      </div>
+
+      <div class="chance-axis">
+        <span class="tick" style="left:0%">0.0</span>
+        <span class="chance-line-label">chance &middot; 0.5</span>
+        <span class="tick" style="left:100%">1.0</span>
+      </div>
+
+      <!-- Row template: track spans 0..1 AUROC, midpoint = 50% = chance line.
+           Value labels are anchored just right of the chance line (uncolored
+           track region) so they never sit on top of same-colored bar fill. -->
+      <div class="diverge-row">
+        <div class="diverge-label">Random Forest<span class="sub">CAM-LDS &rarr; Casino</span></div>
+        <div class="diverge-track">
+          <div class="diverge-bar" style="left:2.4%; width:47.6%; background:var(--bad);"></div>
+          <div class="diverge-val" style="left:calc(50% + 10px); color:var(--bad);">0.024</div>
+        </div>
+      </div>
+      <div class="diverge-row">
+        <div class="diverge-label"><span class="sub">Casino &rarr; CAM-LDS</span></div>
+        <div class="diverge-track">
+          <div class="diverge-bar" style="left:50%; width:3%; background:var(--warn);"></div>
+          <div class="diverge-val" style="left:calc(50% + 26px); color:var(--warn);">0.530</div>
+        </div>
+      </div>
+
+      <div class="diverge-row">
+        <div class="diverge-label">XGBoost<span class="sub">CAM-LDS &rarr; Casino</span></div>
+        <div class="diverge-track">
+          <div class="diverge-bar" style="left:20.3%; width:29.7%; background:var(--bad);"></div>
+          <div class="diverge-val" style="left:calc(50% + 10px); color:var(--bad);">0.203&nbsp;&plusmn;0.281</div>
+        </div>
+      </div>
+      <div class="diverge-row">
+        <div class="diverge-label"><span class="sub">Casino &rarr; CAM-LDS</span></div>
+        <div class="diverge-track">
+          <div class="diverge-bar" style="left:50%; width:0.6%; background:var(--warn);"></div>
+          <div class="diverge-val" style="left:calc(50% + 14px); color:var(--warn);">0.506</div>
+        </div>
+      </div>
+
+      <div class="diverge-row">
+        <div class="diverge-label">1D-CNN<span class="sub">CAM-LDS &rarr; Casino</span></div>
+        <div class="diverge-track">
+          <div class="diverge-bar" style="left:46.2%; width:3.8%; background:var(--warn);"></div>
+          <div class="diverge-val" style="left:calc(50% + 24px); color:var(--warn);">0.462&nbsp;&plusmn;0.296</div>
+        </div>
+      </div>
+      <div class="diverge-row">
+        <div class="diverge-label"><span class="sub">Casino &rarr; CAM-LDS</span></div>
+        <div class="diverge-track">
+          <div class="diverge-bar" style="left:44.7%; width:5.3%; background:var(--warn);"></div>
+          <div class="diverge-val" style="left:calc(50% + 30px); color:var(--warn);">0.447&nbsp;&plusmn;0.130</div>
+        </div>
+      </div>
+
+      <div class="diverge-row">
+        <div class="diverge-label">Isolation Forest<span class="sub">CAM-LDS &rarr; Casino</span></div>
+        <div class="diverge-track">
+          <div class="diverge-bar" style="left:1.4%; width:48.6%; background:var(--bad);"></div>
+          <div class="diverge-val" style="left:calc(50% + 10px); color:var(--bad);">0.014</div>
+        </div>
+      </div>
+      <div class="diverge-row">
+        <div class="diverge-label"><span class="sub">Casino &rarr; CAM-LDS</span></div>
+        <div class="diverge-track">
+          <div class="diverge-bar" style="left:50%; width:0.3%; background:var(--warn);"></div>
+          <div class="diverge-val" style="left:calc(50% + 12px); color:var(--warn);">0.503</div>
+        </div>
+      </div>
+
+      <p class="chart-footnote">Bars show mean cross-dataset AUROC across 5 repeats (std shown where &ge;0.01). A bar ending at the dotted centre line means the model's risk ranking carried zero information into the new environment. A bar extending <em>left of centre</em> means the ranking actively inverted &mdash; the model called real attacks "safe" more often than chance would.</p>
+    </div>
+  </section>
+
+  <!-- ================= ASYMMETRY ================= -->
+  <section>
+    <div class="section-label">05 &middot; The Asymmetry</div>
+    <h2>Why one direction is worse than the other</h2>
+    <p class="section-intro">Both directions fail, but not the same way &mdash; and the difference is explainable from what each dataset actually contains.</p>
+
+    <div class="asym-panel">
+      <div class="asym-side">
+        <div class="label">CAM-LDS &rarr; Casino</div>
+        <div class="headline" style="color:var(--bad)">Actively inverted</div>
+        <p>RF and Isolation Forest reach AUROC&nbsp;&asymp;&nbsp;0.02, with tiny standard deviation &mdash; a <b>stable, reproducible</b> failure. CAM&#8209;LDS's 19 techniques and 54% attack rate teach patterns specific to that environment; applied to Casino, those patterns actively point the wrong way. This is the signature of <b>overfitting</b> to environment-specific statistics, not random noise.</p>
+      </div>
+      <div class="asym-arrow">&harr;</div>
+      <div class="asym-side">
+        <div class="label">Casino &rarr; CAM-LDS</div>
+        <div class="headline" style="color:var(--warn)">Uninformative, not inverted</div>
+        <p>AUROC lands close to 0.50 in every model &mdash; the ranking simply carries no signal, rather than pointing backwards. Casino's narrower training set (4 techniques, 17% attack) doesn't contain enough variety to say anything useful about CAM&#8209;LDS's broader, more diverse attack landscape.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ROOT CAUSE ================= -->
+  <section>
+    <div class="section-label">06 &middot; Root Cause</div>
+    <h2>Why this keeps happening: how CAM&#8209;LDS was built</h2>
+    <p class="section-intro">Sections 03 and 04&ndash;05 describe two separate-looking failures. They share one root cause, found in the script that built the raw dataset &mdash; not in anything about the models.</p>
+
+    <div class="rootcause-panel">
+      <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:4px;">CAM&#8209;LDS's 54% attack rate is not a natural property of the monitored environment. It's the direct, deliberate output of the extraction script's sampling parameters:</p>
+
+      <div class="code-block">
+<span class="cm"># extract_caml_full_v3.py</span>
+parser.add_argument(<span class="val">'--benign_ratio'</span>, type=float, default=<span class="val">2.5</span>)
+<span class="kw">MAX_PER_SCENARIO_BENIGN</span> = <span class="val">15000</span>   <span class="cm"># also caps attack per technique</span>
+<span class="cm"># &darr; pushes all 19 techniques toward roughly equal representation,</span>
+<span class="cm">#   and samples benign processes at ~2.5x the resulting attack count</span>
+      </div>
+
+      <p style="font-size:13.5px; color:var(--text-muted);">This is a <b style="color:var(--text)">curated, class-balanced training benchmark</b> &mdash; built so a supervised classifier has plenty of diverse, roughly-balanced examples to learn from. It was never meant to represent what attack prevalence looks like in a real deployment.</p>
+
+      <div class="contrast-strip">
+        <span>CAM-LDS attack rate <span class="cstat bad">54.0%</span> &mdash; engineered</span>
+        <span style="color:var(--text-faint);">vs.</span>
+        <span>Casino attack rate <span class="cstat good">17.1%</span> &mdash; plausible real-world base rate</span>
+      </div>
+
+      <div class="consequence-flow">
+        <div class="flow-source"><b>One construction choice</b> &mdash; near-balanced sampling across all 19 techniques &mdash; produces two separate-looking downstream failures:</div>
+        <div class="flow-arrow-down">&darr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;</div>
+        <div class="flow-branch">
+          <span class="branch-tag">Consequence A &middot; &sect;03</span>
+          <p><b>Isolation Forest's structural failure isn't about "unusual" data</b> &mdash; it's that the extraction script explicitly engineered away the sparse minority the algorithm needs. There was never a minority to isolate.</p>
+        </div>
+        <div class="flow-branch">
+          <span class="branch-tag">Consequence B &middot; &sect;04&ndash;05</span>
+          <p><b>Models learn to expect ~54% prevalence across 19 evenly-capped techniques.</b> Casino looks nothing like that. The cross-dataset collapse is partly the well-documented phenomenon of models trained on a curated benchmark failing to generalize to realistic, imbalanced conditions &mdash; not purely a mysterious environmental difference.</p>
+        </div>
+      </div>
+
+      <p style="font-size:12.5px; color:var(--text-faint); margin-top:18px; line-height:1.6;">This reframes an "unexplained distribution shift" into a specific, testable claim: regenerating CAM&#8209;LDS at a realistic (~17%) attack rate and rerunning the pipeline should measurably improve both Isolation Forest's within-dataset score and the cross-dataset transfer &mdash; if the hypothesis is right. That experiment is queued but not yet run at the time of writing.</p>
+    </div>
+  </section>
+
+  <!-- ================= METHOD NOTE ================= -->
+  <section>
+    <div class="section-label">07 &middot; Methodology, in brief</div>
+    <div class="method-note">
+      <b>Thresholding:</b> every model's decision cutoff is chosen to maximize F1 subject to a 5% FPR cap, calibrated on a held-out slice of training data only &mdash; never on test data.<br>
+      <b>Isolation Forest disclosure:</b> "novelty mode" fits only on benign training rows. This uses labels to select the fit subset, making it semi-supervised rather than purely unsupervised &mdash; the trees themselves still never see <code>y</code>.<br>
+      <b>Leak-free CV:</b> vector-group StratifiedGroupKFold ensures duplicate feature rows never span the train/test boundary, following the Milestone&nbsp;2 methodology.<br>
+      <b>Cross-dataset features:</b> restricted to the 17 features present in both corpora &mdash; the collapse above is not an artifact of missing features.
+    </div>
+    <p style="margin-top:14px; font-size:13px;">
+      <a href="experiment_log.html" style="color:var(--accent); text-decoration:none; font-family:var(--mono); font-size:12.5px; border:1px solid var(--border); padding:7px 14px; border-radius:20px; display:inline-flex; align-items:center; gap:6px;">See the Experiment Log &rarr;</a>
+      <span style="color:var(--text-faint); margin-left:8px;">Every intervention tried, hypothesis, before/after evidence, and verdict.</span>
+    </p>
+  </section>
+
+  <footer>
+    <span>Milestone 3 &middot; Step 7&ndash;8 Results</span>
+    <span>Generated from run_milestone3.sh &amp; cross_dataset_eval.py output</span>
+  </footer>
+
+</div>
+</body>
+</html>
