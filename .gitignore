@@ -1,0 +1,22 @@
+# Large per-sample error dumps (17MB each) — summary CSVs/PNGs alongside these are kept
+**/error_analysis_results/**/*_error_rows.csv
+**/error_analysis_results_original/**/*_error_rows.csv
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+/data/raw/
+/combined/
+/logs/
