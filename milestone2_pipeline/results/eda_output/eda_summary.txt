@@ -1,0 +1,25 @@
+EDA Summary Report — Milestone 2
+============================================================
+
+Dataset: dataset1_features.csv
+Total processes: 90,000
+Benign (0):  82,958 (92.2%)
+Attack (1):  7,042 (7.8%)
+
+Random Forest results:
+  AUROC:     0.9681
+  F1:        0.8535
+  Precision: 0.8484
+  Recall:    0.8587
+
+Mann-Whitney U results:
+  Features tested:    16
+  Significant (p<.05):11
+  Large effect size:  3
+
+  Top features by Cohen's |d|:
+    events_per_second         d=+1.0614 (large) p=<0.0001
+    failed_call_rate          d=+1.0482 (large) p=<0.0001
+    failed_call_count         d=+0.9682 (large) p=<0.0001
+    seq_length                d=+0.4807 (small) p=<0.0001
+    ephemeral_privileged      d=-0.2920 (small) p=<0.0001

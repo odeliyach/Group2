@@ -1,0 +1,21 @@
+feature,in_CAM-LDS,in_CasinoLimit,status
+lifetime_seconds,True,True,Direct (native to both)
+events_per_second,True,True,Direct (native to both)
+seq_length,True,True,Direct (native to both)
+unique_syscalls,True,True,Direct (native to both)
+uid_is_root,True,True,Direct (native to both)
+uid_changed,True,True,Direct (native to both)
+euid_root,True,True,Direct (native to both)
+max_uid_euid_delta,True,True,Direct (native to both)
+is_suid_exec,True,False,Unavailable in CasinoLimit
+auid_euid_mismatch,True,True,Direct (native to both)
+ephemeral_privileged,True,False,Unavailable in CasinoLimit
+failed_call_rate,True,True,Direct (native to both)
+failed_call_count,True,True,Direct (native to both)
+priv_op_count,True,True,Direct (native to both)
+exec_count,True,True,Direct (native to both)
+file_access_count,True,True,Direct (native to both)
+network_count,True,True,Direct (native to both)
+shell_from_service,True,True,Direct (native to both)
+sensitive_path_access,True,True,Direct (native to both)
+parent_child_rarity,True,False,Unavailable in CasinoLimit

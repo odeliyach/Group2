@@ -1,0 +1,6 @@
+Duplication report — CasinoLimit
+==================================================
+Duplicate rows: 91,289 / 91,692 (99.6%)
+Unique feature-vector groups: 356 (257.6x avg duplication)
+Using vector-group split: identical rows always land on the
+same side of the split, so duplication cannot leak.

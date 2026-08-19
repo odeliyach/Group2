@@ -1,0 +1,37 @@
+Ch 4.2 — Feature Importance Discrepancy Analysis
+============================================================
+
+Spearman rank correlation (domain vs RF): ρ=-0.699, p=0.0006
+→ Low alignment. RF identifies different patterns than domain intuition.
+
+Top 5 by RF importance:
+  RF#1 (Domain#20): lifetime_seconds  importance=0.2788
+  RF#2 (Domain#10): events_per_second  importance=0.1575
+  RF#3 (Domain#18): unique_syscalls  importance=0.0986
+  RF#4 (Domain#17): network_count  importance=0.0985
+  RF#5 (Domain#15): failed_call_count  importance=0.0891
+
+Largest rank discrepancies (|RF rank - domain rank| > 5):
+  lifetime_seconds: ranked higher by RF than domain (RF#1 vs Domain#20)
+  is_suid_exec: ranked lower by RF than domain (RF#17 vs Domain#1)
+  auid_euid_mismatch: ranked lower by RF than domain (RF#18 vs Domain#2)
+  unique_syscalls: ranked higher by RF than domain (RF#3 vs Domain#18)
+  network_count: ranked higher by RF than domain (RF#4 vs Domain#17)
+  max_uid_euid_delta: ranked lower by RF than domain (RF#16 vs Domain#3)
+  sensitive_path_access: ranked lower by RF than domain (RF#19 vs Domain#6)
+  seq_length: ranked higher by RF than domain (RF#7 vs Domain#19)
+  parent_child_rarity: ranked lower by RF than domain (RF#20 vs Domain#8)
+  failed_call_count: ranked higher by RF than domain (RF#5 vs Domain#15)
+  events_per_second: ranked higher by RF than domain (RF#2 vs Domain#10)
+  file_access_count: ranked higher by RF than domain (RF#8 vs Domain#16)
+  shell_from_service: ranked lower by RF than domain (RF#14 vs Domain#7)
+
+Features significant in Mann-Whitney but low RF importance:
+  priv_op_count: statistically significant but low RF importance=0.0197
+  → Possible explanation: feature is correlated with a stronger feature and its variance is captured there.
+  exec_count: statistically significant but low RF importance=0.0178
+  → Possible explanation: feature is correlated with a stronger feature and its variance is captured there.
+  ephemeral_privileged: statistically significant but low RF importance=0.0100
+  → Possible explanation: feature is correlated with a stronger feature and its variance is captured there.
+  uid_is_root: statistically significant but low RF importance=0.0092
+  → Possible explanation: feature is correlated with a stronger feature and its variance is captured there.

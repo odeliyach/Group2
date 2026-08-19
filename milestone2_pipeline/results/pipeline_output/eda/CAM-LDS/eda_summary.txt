@@ -1,0 +1,18 @@
+EDA Summary — CAM-LDS
+============================================================
+
+Input: combined/dataset1_features.csv
+Total rows: 90,805
+Benign: 41,783 (46.0%)
+Attack: 49,022 (54.0%)
+
+Random Forest (leak-free, vector-group CV):
+  AUROC: 0.9160 +/- 0.1079
+
+Mann-Whitney U: 20 features tested, 19 significant (p<.05), 2 large effect size
+Top features by |Cohen's d|:
+  uid_changed               d=+1.4267 (large) p=<0.0001
+  unique_syscalls           d=+1.0030 (large) p=<0.0001
+  events_per_second         d=-0.5149 (medium) p=<0.0001
+  parent_child_rarity       d=+0.1477 (negligible) p=<0.0001
+  exec_count                d=-0.1366 (negligible) p=<0.0001

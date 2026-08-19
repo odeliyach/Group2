@@ -1,0 +1,34 @@
+Ch 5.3 — Scaling Remedy Evaluation: CAM-LDS vs CasinoLimit
+============================================================
+
+Selection metric: standardized mean gap |mean_A - mean_B| / pooled_std,
+before and after each candidate transform. Lower is better (0 = means
+coincide in pooled-std units). NOT selected by KS statistic -- KS is
+invariant under any monotonic transform applied identically to both
+datasets, so it cannot distinguish log1p/z-score/robust from doing
+nothing; it's reported alongside for reference only, not as a
+selection criterion. Note: tree-based/isolation-based detection
+models (Ch6) are scale-invariant and are trained separately per
+dataset, so this remedy applies to the CROSS-DATASET COMPARISON/
+VISUALIZATION step (this chapter), not to the detection models
+themselves.
+
+  lifetime_seconds          before=0.1363  best=log1p   after=0.0976  (+28.4% gap reduction)
+  max_uid_euid_delta        before=0.2660  best=log1p   after=0.2607  (+2.0% gap reduction)
+  events_per_second         before=1.4280  best=robust  after=1.4280  (+0.0% gap reduction)
+  unique_syscalls           before=1.6752  best=zscore  after=1.6752  (+0.0% gap reduction)
+  seq_length                before=0.0571  best=none    after=0.0571  (+0.0% gap reduction)
+  uid_is_root               before=1.8580  best=zscore  after=1.8580  (+0.0% gap reduction)
+  uid_changed               before=0.9371  best=log1p   after=0.9371  (+0.0% gap reduction)
+  euid_root                 before=1.7864  best=zscore  after=1.7864  (+0.0% gap reduction)
+  auid_euid_mismatch        before=1.8441  best=log1p   after=1.8441  (+0.0% gap reduction)
+  failed_call_rate          before=1.9324  best=none    after=1.9324  (+0.0% gap reduction)
+  failed_call_count         before=0.0688  best=none    after=0.0688  (+0.0% gap reduction)
+  priv_op_count             before=0.0077  best=zscore  after=0.0077  (+0.0% gap reduction)
+  exec_count                before=1.3291  best=none    after=1.3291  (+0.0% gap reduction)
+  file_access_count         before=0.0273  best=none    after=0.0273  (+0.0% gap reduction)
+  network_count             before=0.0209  best=none    after=0.0209  (+0.0% gap reduction)
+  shell_from_service        before=0.2663  best=none    after=0.2663  (+0.0% gap reduction)
+  sensitive_path_access     before=0.0223  best=log1p   after=0.0223  (+0.0% gap reduction)
+
+Overall recommendation: none improves the most features (7/17).

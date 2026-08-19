@@ -1,0 +1,28 @@
+Validation Summary — CasinoLimit
+============================================================
+
+Dataset: 91,692 rows, 17 features
+Duplicate feature vectors: 99.6%
+
+Headline result (15x repeated 5-fold vector-group CV, 75 total folds -- this is the number to report in Table 8):
+  AUROC = 0.9950 +/- 0.0103
+  F1    = 0.9414 +/- 0.1791
+
+Feature ablation (sorted by importance):
+  file_access_count         DeltaF1=-0.4657  (important)
+  sensitive_path_access     DeltaF1=-0.0024  (neutral)
+  auid_euid_mismatch        DeltaF1=-0.0012  (neutral)
+  unique_syscalls           DeltaF1=-0.0003  (neutral)
+  exec_count                DeltaF1=-0.0001  (neutral)
+  failed_call_rate          DeltaF1=-0.0000  (neutral)
+  priv_op_count             DeltaF1=-0.0000  (neutral)
+  failed_call_count         DeltaF1=-0.0000  (neutral)
+  network_count             DeltaF1=+0.0000  (neutral)
+  seq_length                DeltaF1=+0.0000  (neutral)
+  shell_from_service        DeltaF1=+0.0000  (neutral)
+  events_per_second         DeltaF1=+0.0000  (neutral)
+  euid_root                 DeltaF1=+0.0000  (neutral)
+  lifetime_seconds          DeltaF1=+0.0000  (neutral)
+  uid_is_root               DeltaF1=+0.0000  (neutral)
+  max_uid_euid_delta        DeltaF1=+0.0000  (neutral)
+  uid_changed               DeltaF1=+0.0000  (neutral)

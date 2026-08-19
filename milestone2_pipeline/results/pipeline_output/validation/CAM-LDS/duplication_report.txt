@@ -1,0 +1,6 @@
+Duplication report — CAM-LDS
+==================================================
+Duplicate rows: 82,707 / 90,805 (91.1%)
+Unique feature-vector groups: 7,909 (11.5x avg duplication)
+Using vector-group split: identical rows always land on the
+same side of the split, so duplication cannot leak.

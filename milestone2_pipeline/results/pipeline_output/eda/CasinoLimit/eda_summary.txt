@@ -1,0 +1,18 @@
+EDA Summary — CasinoLimit
+============================================================
+
+Input: combined/casino_process_level_ds.csv
+Total rows: 91,692
+Benign: 75,999 (82.9%)
+Attack: 15,693 (17.1%)
+
+Random Forest (leak-free, vector-group CV):
+  AUROC: 0.9133 +/- 0.1133
+
+Mann-Whitney U: 17 features tested, 14 significant (p<.05), 7 large effect size
+Top features by |Cohen's d|:
+  exec_count                d=+8.3754 (large) p=<0.0001
+  euid_root                 d=+3.1532 (large) p=<0.0001
+  file_access_count         d=-2.8683 (large) p=<0.0001
+  uid_is_root               d=+1.9836 (large) p=<0.0001
+  auid_euid_mismatch        d=-1.4830 (large) p=<0.0001

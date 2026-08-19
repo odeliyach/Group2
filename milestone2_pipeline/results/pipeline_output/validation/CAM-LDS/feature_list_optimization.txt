@@ -1,0 +1,14 @@
+Feature List Optimization — CAM-LDS
+============================================================
+
+Full feature set (20 features):
+  F1    = 0.7792 +/- 0.0163
+  AUROC = 0.8792 +/- 0.0102
+
+Reduced feature set (3 features, 85% fewer -- dropped ['lifetime_seconds', 'events_per_second', 'seq_length', 'uid_is_root', 'uid_changed', 'euid_root', 'is_suid_exec', 'auid_euid_mismatch', 'ephemeral_privileged', 'failed_call_rate', 'failed_call_count', 'priv_op_count', 'exec_count', 'network_count', 'shell_from_service', 'sensitive_path_access', 'parent_child_rarity']):
+  F1    = 0.5917 +/- 0.0107
+  AUROC = 0.6487 +/- 0.0700
+
+Delta: F1 -0.1875  AUROC -0.2304
+
+Reduced set costs real detection power (F1 -0.1875, AUROC -0.2304): do not drop these 17 features purely for compute savings.

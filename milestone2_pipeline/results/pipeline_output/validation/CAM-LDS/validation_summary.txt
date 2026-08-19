@@ -1,0 +1,31 @@
+Validation Summary — CAM-LDS
+============================================================
+
+Dataset: 90,805 rows, 20 features
+Duplicate feature vectors: 91.1%
+
+Headline result (15x repeated 5-fold vector-group CV, 75 total folds -- this is the number to report in Table 8):
+  AUROC = 0.8776 +/- 0.0088
+  F1    = 0.7745 +/- 0.0123
+
+Feature ablation (sorted by importance):
+  max_uid_euid_delta        DeltaF1=-0.0293  (important)
+  unique_syscalls           DeltaF1=-0.0175  (important)
+  file_access_count         DeltaF1=-0.0142  (important)
+  shell_from_service        DeltaF1=-0.0042  (neutral)
+  sensitive_path_access     DeltaF1=-0.0041  (neutral)
+  lifetime_seconds          DeltaF1=-0.0030  (neutral)
+  is_suid_exec              DeltaF1=-0.0030  (neutral)
+  seq_length                DeltaF1=-0.0023  (neutral)
+  euid_root                 DeltaF1=-0.0023  (neutral)
+  ephemeral_privileged      DeltaF1=-0.0023  (neutral)
+  uid_is_root               DeltaF1=-0.0020  (neutral)
+  priv_op_count             DeltaF1=-0.0019  (neutral)
+  failed_call_rate          DeltaF1=-0.0018  (neutral)
+  failed_call_count         DeltaF1=-0.0016  (neutral)
+  network_count             DeltaF1=-0.0005  (neutral)
+  exec_count                DeltaF1=+0.0000  (neutral)
+  events_per_second         DeltaF1=+0.0036  (neutral)
+  auid_euid_mismatch        DeltaF1=+0.0383  (hurts)
+  uid_changed               DeltaF1=+0.0929  (hurts)
+  parent_child_rarity       DeltaF1=+0.1113  (hurts)

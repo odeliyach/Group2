@@ -1,0 +1,14 @@
+Feature List Optimization — CasinoLimit
+============================================================
+
+Full feature set (17 features):
+  F1    = 0.9899 +/- 0.0016
+  AUROC = 0.9988 +/- 0.0002
+
+Reduced feature set (1 features, 94% fewer -- dropped ['lifetime_seconds', 'events_per_second', 'seq_length', 'unique_syscalls', 'uid_is_root', 'uid_changed', 'euid_root', 'max_uid_euid_delta', 'auid_euid_mismatch', 'failed_call_rate', 'failed_call_count', 'priv_op_count', 'exec_count', 'network_count', 'shell_from_service', 'sensitive_path_access']):
+  F1    = 0.9907 +/- 0.0000
+  AUROC = 0.9947 +/- 0.0010
+
+Delta: F1 +0.0008  AUROC -0.0041
+
+Reduced set matches or beats the full set (F1 +0.0008, AUROC -0.0041): the 16 dropped features can be removed without a meaningful loss in detection power, at 94% lower feature-extraction/training cost.

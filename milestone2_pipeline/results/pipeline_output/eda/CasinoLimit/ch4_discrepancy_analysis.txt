@@ -1,0 +1,24 @@
+Ch 4.2 — Feature Importance Discrepancy Analysis: CasinoLimit
+=================================================================
+
+Spearman rank correlation (domain vs RF): rho=0.284, p=0.2687
+-> Weak/near-zero alignment.
+
+Top 5 by RF importance:
+  RF#1 (Domain#16): file_access_count  importance=0.3680
+  RF#2 (Domain#5): exec_count  importance=0.3026
+  RF#3 (Domain#12): euid_root  importance=0.1083
+  RF#4 (Domain#2): auid_euid_mismatch  importance=0.0537
+  RF#5 (Domain#19): seq_length  importance=0.0496
+
+Data-leakage check (raw identifier artifacts):
+  None of the 17 features in this run's schema are raw IP, MAC, or timestamp fields (full list: ['lifetime_seconds', 'events_per_second', 'seq_length', 'unique_syscalls', 'uid_is_root', 'uid_changed', 'euid_root', 'max_uid_euid_delta', 'auid_euid_mismatch', 'failed_call_rate', 'failed_call_count', 'priv_op_count', 'exec_count', 'file_access_count', 'network_count', 'shell_from_service', 'sensitive_path_access']) -- every feature is behaviorally derived (counts, rates, deltas, booleans), so a leakage explanation for any discrepancy below is structurally ruled out, not just assumed.
+
+Largest rank discrepancies (|RF rank - domain rank| > 5): 7
+  file_access_count: ranked higher by RF than domain (RF#1 vs Domain#16). strongest correlate is exec_count (r=-0.714) -- consistent with multicollinearity absorbing/duplicating file_access_count's signal
+  seq_length: ranked higher by RF than domain (RF#5 vs Domain#19). strongest correlate is unique_syscalls (r=+0.918) -- consistent with multicollinearity absorbing/duplicating seq_length's signal
+  euid_root: ranked higher by RF than domain (RF#3 vs Domain#12). strongest correlate is uid_is_root (r=+0.791) -- consistent with multicollinearity absorbing/duplicating euid_root's signal
+  sensitive_path_access: ranked lower by RF than domain (RF#14 vs Domain#6). strongest correlate is failed_call_rate (r=+0.155, weak) -- multicollinearity is NOT a strong explanation here; likely a genuine latent pattern the domain ranking missed
+  lifetime_seconds: ranked higher by RF than domain (RF#12 vs Domain#20). strongest correlate is file_access_count (r=+0.413, weak) -- multicollinearity is NOT a strong explanation here; likely a genuine latent pattern the domain ranking missed
+  priv_op_count: ranked lower by RF than domain (RF#11 vs Domain#4). strongest correlate is events_per_second (r=+0.261, weak) -- multicollinearity is NOT a strong explanation here; likely a genuine latent pattern the domain ranking missed
+  uid_is_root: ranked higher by RF than domain (RF#6 vs Domain#13). strongest correlate is euid_root (r=+0.791) -- consistent with multicollinearity absorbing/duplicating uid_is_root's signal
