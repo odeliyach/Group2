@@ -23,12 +23,12 @@
 # Submit from the workshop ROOT directory:  sbatch scripts/pipeline/run_pipeline.sh
 
 PYTHON="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python"
-SCRIPTS_DIR="scripts/eda"     # directory containing the 3 unified_*.py / cross_dataset_*.py scripts
+SCRIPTS_DIR="milestone2_pipeline/scripts/eda"     # directory containing the 3 unified_*.py / cross_dataset_*.py scripts
 
 REPEATS=15                    # CV repeats -- SAME value for both datasets, on purpose
 
 # Dataset 1 (CAM-LDS) -- already-extracted process-level feature CSV.
-DS1_FEATURES="combined/dataset1_features.csv"
+DS1_FEATURES="data/dataset1_features.csv"
 DS1_NAME="CAM-LDS"
 DS1_LABEL_COL="label"
 DS1_TECH_COL="technique"
@@ -39,13 +39,13 @@ DS1_TECH_COL="technique"
 # resolve_dataset_casino_only.py then process_level_rollup_final.py
 # manually first (both have their I/O paths hardcoded inside the
 # scripts themselves, not CLI flags).
-DS2_ROLLUP="combined/casino_process_level_ds.csv"
+DS2_ROLLUP="data/casino_process_level_ds.csv"
 DS2_NAME="CasinoLimit"
 DS2_LABEL_COL="is_privesc"
 DS2_TECH_COL="technique"
 DS2_EXCLUDE_TECHNIQUES="T1003,T1078"
 
-OUT="pipeline_output/"
+OUT="milestone2_pipeline/results/pipeline_output/"
 mkdir -p "$OUT" logs "$OUT/eda/$DS1_NAME" "$OUT/eda/$DS2_NAME" \
          "$OUT/validation/$DS1_NAME" "$OUT/validation/$DS2_NAME" "$OUT/cross_dataset"
 

@@ -24,10 +24,10 @@
 # Submit from the workshop ROOT directory:  sbatch scripts/milestone3/run_sensitivity.sbatch
 
 PYTHON="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python -u"
-SCRIPTS_DIR="scripts/milestone3"
+SCRIPTS_DIR="milestone3_pipeline/src/" 
 
-DATA_DIR="combined"                # matches run_milestone3.sh's real data path
-OUT_DIR="$SCRIPTS_DIR/sensitivity_results"
+DATA_DIR="data"                # matches run_milestone3.sh's real data path
+OUT_DIR="milestone3_pipeline/results/current/sensitivity_results"
 REPEATS=3                            # exploratory sweep repeat count (cheap)
 
 mkdir -p logs "$OUT_DIR"

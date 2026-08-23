@@ -28,12 +28,12 @@
 # manifestations_raw/ (5,753 files, different internal organization) is
 # NOT included yet -- not explored for overlap with manifestations_filtered.
 #
-# Submit from the workshop ROOT directory:  sbatch scripts/milestone3/run_camlds_full_corpus.sh
+# Submit from the workshop ROOT directory:  sbatch milestone3_pipeline/run_scripts/cam_28attack/run_camlds_full_corpus.sh
 
 PYTHON="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python -u"
 TARGET_TOTAL_SIZE=90805
 MAX_BENIGN_PER_SCENARIO=100000
-OUT_DIR="combined_v3"
+OUT_DIR="data/v3"
 
 mkdir -p logs "$OUT_DIR"
 

@@ -11,7 +11,7 @@
 #SBATCH --open-mode=truncate
 #
 # Runs the SAME run_pipeline.py used for all other headline results, now
-# pointed at the full-corpus regenerated CAM-LDS variant (combined_v3/,
+# pointed at the full-corpus regenerated CAM-LDS variant (data/v3/,
 # from run_camlds_full_corpus.sh). Output goes to a SEPARATE
 # outputs_camlds_v3/ folder -- never touches the original outputs/ or
 # outputs_camlds_v2/.
@@ -19,12 +19,12 @@
 # Run run_camlds_full_corpus.sh FIRST and confirm it finished (check the
 # achieved row count / attack rate) before submitting this.
 #
-# Submit from the workshop ROOT directory:  sbatch scripts/milestone3/run_milestone3_camlds_v3.sh
+# Submit from the workshop ROOT directory:  sbatch milestone3_pipeline/run_scripts/cam_28attack/run_milestone3_camlds_v3.sh
 
 PYTHON="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python -u"
-SCRIPTS_DIR="scripts/milestone3"
-DATA_DIR="combined_v3"
-OUT_DIR="$SCRIPTS_DIR/outputs_camlds_v3"
+SCRIPTS_DIR="milestone3_pipeline/src/" 
+DATA_DIR="data/v3"
+OUT_DIR="milestone3_pipeline/results/current/outputs_camlds_v3"
 
 mkdir -p logs "$OUT_DIR"
 

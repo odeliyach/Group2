@@ -30,16 +30,16 @@
 # per-row inspection, not a stable aggregate number -- much cheaper than
 # the headline run, but CNN is still the long pole.
 #
-# Submit from the workshop ROOT directory:  sbatch scripts/milestone3/run_error_analysis.sh
+# Submit from the workshop ROOT directory:  sbatch milestone3_pipeline/run_scripts/cam_28attack/run_error_analysis.sh
 
 PYTHON="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python -u"
-SCRIPTS_DIR="scripts/milestone3"
-DATA_DIR="combined_v3"   # the regenerated (28.7% attack) CAM-LDS variant --
+SCRIPTS_DIR="milestone3_pipeline/src/" 
+DATA_DIR="data/v3"   # the regenerated (28.7% attack) CAM-LDS variant --
                           # casino_process_level_ds.csv already lives here
                           # too (copied earlier for the cross-dataset run).
-                          # Use "combined" instead for the original 54%
+                          # Use "data" instead for the original 54%
                           # data -- see run_error_analysis_original.sh.
-OUT_BASE="$SCRIPTS_DIR/error_analysis_results"
+OUT_BASE="milestone3_pipeline/results/current/error_analysis_results"
 
 mkdir -p logs "$OUT_BASE"
 

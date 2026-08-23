@@ -9,14 +9,14 @@
 #SBATCH --partition=studentkillable
 # Submit from the workshop ROOT directory:  sbatch scripts/caml/extract_caml_full_v3.sh
 
-mkdir -p logs combined
+mkdir -p logs data
 echo "Start: $(date)"
 
 /vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python \
     scripts/caml/extract_caml_full_v3.py \
     --benign_ratio 2.5 \
     --min_events 2 \
-    --out combined/raw_labeled_logs_v3.csv
+    --out data/raw_labeled_logs_v3.csv
 
 echo "Exit: $?  Finished: $(date)"
-ls -lh combined/raw_labeled_logs_v3.csv
+ls -lh data/raw_labeled_logs_v3.csv

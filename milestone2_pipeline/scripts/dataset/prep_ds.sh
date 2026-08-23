@@ -11,8 +11,8 @@
 
 PYTHON="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python"
 SCRIPT="scripts/dataset/prepare_dataset.py"
-CSV="combined/raw_labeled_logs_v3.csv"
-OUT="combined/"
+CSV="data/raw_labeled_logs_v3.csv"
+OUT="data/"
 
 mkdir -p "$OUT" logs
 

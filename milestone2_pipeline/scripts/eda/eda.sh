@@ -11,8 +11,8 @@
 
 PYTHON="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python"
 SCRIPT="scripts/eda/run_eda.py"
-FEATURES="combined/dataset2_lidds_EPS36165.csv"
-FIXED="combined/dataset1_fixed.csv"
+FEATURES="data/dataset2_lidds_EPS36165.csv"
+FIXED="data/dataset1_fixed.csv"
 OUT="eda_output/"
 
 mkdir -p "$OUT" logs

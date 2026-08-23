@@ -22,9 +22,9 @@
 # Submit from the workshop ROOT directory:  sbatch scripts/milestone3/run_cross_dataset_repeats.sh
 
 PYTHON="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python -u"
-SCRIPTS_DIR="scripts/milestone3"
-DATA_DIR="combined"
-OUT_DIR="$SCRIPTS_DIR/outputs/cross_dataset"
+SCRIPTS_DIR="milestone3_pipeline/src/"
+DATA_DIR="data"  
+OUT_DIR="milestone3_pipeline/results/current/outputs/cross_dataset"
 
 MODEL="cnn"
 REPEATS=5

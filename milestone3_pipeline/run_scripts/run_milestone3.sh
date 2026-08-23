@@ -37,13 +37,13 @@
 # Submit from the workshop ROOT directory:  sbatch scripts/milestone3/run_milestone3.sbatch
 
 PYTHON="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python -u"
-SCRIPTS_DIR="scripts/milestone3"   # directory containing config.py, ingestion.py, run_pipeline.py, etc.
+SCRIPTS_DIR="milestone3_pipeline/src/"   # directory containing config.py, ingestion.py, run_pipeline.py, etc.
 
 # Both CSVs must live in the SAME directory (unlike Milestone 2's split
 # combined/ vs root layout -- ingestion.py expects one --data-dir).
-DATA_DIR="combined"    # dataset1_features.csv and casino_process_level_ds.csv both live here
+DATA_DIR="data"    # dataset1_features.csv and casino_process_level_ds.csv both live here
 
-OUT_DIR="$SCRIPTS_DIR/outputs"
+OUT_DIR="milestone3_pipeline/results/current/outputs"
 
 mkdir -p logs "$OUT_DIR"
 

@@ -18,12 +18,13 @@
 # One array task per model (both train/test directions run inside a
 # single cross_dataset_eval.py call).
 #
-# Submit from the workshop ROOT directory:  sbatch scripts/milestone3/run_cross_dataset.sbatch
+# Submit from the workshop ROOT directory:  sbatch milestone3_pipeline/run_scripts/cam_28attack/run_cross_dataset.sbatch
 
 PYTHON="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/anaconda3/envs/toxic/bin/python -u"
-SCRIPTS_DIR="scripts/milestone3"
-DATA_DIR="combined_v3"
-OUT_DIR="$SCRIPTS_DIR/outputs_camlds_v3/cross_dataset"
+SCRIPTS_DIR="milestone3_pipeline/src/"
+
+DATA_DIR="data/v3"  
+OUT_DIR="milestone3_pipeline/results/current/outputs_camlds_v3/cross_dataset"
 CALIBRATION_FRAC=0.05   # NEW: with v3's AUROC now near-perfect for RF/XGB/CNN
                         # (0.90-0.96), the remaining F1 gap is very likely pure
                         # threshold miscalibration, not a ranking failure --
