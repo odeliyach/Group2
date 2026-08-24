@@ -78,7 +78,9 @@ CNN_PARAMS = {
     "kernel_size": 3,
     "dense_units": [32],
     "dropout": 0.3,
-    "learning_rate": 1e-3,
+    "learning_rate": 1e-2,  # was 1e-3 -- sensitivity_analysis.py's own sweep shows
+                             # lr=0.01 beats lr=0.001 on BOTH datasets (Casino F1
+                             # 0.642->0.751, std 0.381->0.282; CAM-LDS F1 0.808->0.821)
     "batch_size": 512,
     "epochs": 15,
     "early_stopping_patience": 3,

@@ -62,6 +62,16 @@ def build_cnn(n_features: int, overrides: dict = None):
         raise ImportError("tensorflow not installed. pip install tensorflow --break-system-packages")
     p = {**CNN_PARAMS, **(overrides or {})}
 
+    # BUGFIX: CNN_PARAMS["random_state"] was defined in config.py but never
+    # actually wired to TensorFlow -- unlike build_rf/build_xgb, which pass
+    # their whole params dict straight into a constructor that accepts
+    # random_state directly, Keras has no such single knob. Without this,
+    # every fit used an uncontrolled random weight init, adding pure noise
+    # variance on top of genuine model instability -- especially costly on
+    # CasinoLimit's ~356 unique feature-vector groups, where any single
+    # fit's luck-of-the-init matters more than on CAM-LDS's larger corpus.
+    tf.random.set_seed(p["random_state"])
+
     inputs = layers.Input(shape=(n_features, 1))
     x = inputs
     for filters in p["conv_filters"]:
