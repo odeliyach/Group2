@@ -4,3 +4,6 @@ scikit-learn
 xgboost
 tensorflow-cpu
 matplotlib
+jsonschema
+requests
+pytest
