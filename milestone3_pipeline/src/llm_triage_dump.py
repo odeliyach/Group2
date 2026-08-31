@@ -7,8 +7,10 @@ A row qualifies iff, out-of-fold:
 
 XGBoost and the CNN are fit per fold via train_eval._FITTERS, the exact fitters
 error_analysis.py and the headline pipeline use, so these calls are scored under
-the identical F1-threshold / MAX_FPR logic. hybrid_cascade.py is imported only
-for its routing-band constants; its blending is not used and it is not modified.
+the identical F1-threshold / MAX_FPR logic. Nothing is imported from
+hybrid_cascade.py here: the routing band (0.3/0.7) is mirrored in
+`config.LLM_TRIAGE` from `hybrid_cascade.cascade_predict`'s defaults; keep the two
+in sync.
 
 Usage:
     python llm_triage_dump.py --dataset camlds --data-dir data/v3 --out results/current/llm_triage/camlds

@@ -49,6 +49,6 @@ def test_known_failure_blocks_cover_both_datasets_and_omit_technique():
         assert len(text) < 700  # keeps the context window small
 
 
-def test_prompt_text_mentions_only_the_four_mitre_families():
+def test_system_prompt_mentions_the_four_mitre_families():
     for tid in ("T1548", "T1059", "T1222", "T1595"):
         assert tid in P.SYSTEM_PROMPT

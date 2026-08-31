@@ -3,15 +3,19 @@
 Reads one <ds>_<model>_llm_arbitration.csv (Task 6) plus <ds>_cascade_oof.csv
 (Task 4) and reports:
   A. arbitration accuracy on the contradiction set vs 5 baselines
-  B. whole-population pipeline effect (cascade blend@0.5 vs cascade+LLM)
+  B. whole-population pipeline effect (cascade@0.5thr vs cascade+LLM), per-fold
+     and pooled
   D. confidence calibration (ECE) and key_features overlap with error-analysis
      discriminators
   E. parse-failure rate
 Charts + a paste-ready report_section markdown.
 
-Note: baseline B uses a fixed 0.5 blend cutoff (labelled 'blend@0.5'); the live
-cascade picks its cutoff per fold from XGBoost train probabilities, so this is a
-close, honest approximation, not the exact cascade decision.
+Note on baseline B: the `base` decision now mirrors hybrid_cascade.cascade_predict
+exactly -- blend = 0.5*proba_xgb + 0.5*proba_cnn ONLY inside the routing band
+[LOW, HIGH], proba_xgb untouched outside it. The ONE remaining approximation: the
+real cascade selects its cutoff per-fold as the F1-optimal threshold under
+MAX_FPR=0.05; this table thresholds at 0.5. Rows differ from the cascade only in
+that cutoff.
 """
 
 import argparse
@@ -24,6 +28,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score)
+
+from llm_triage_dump import LOW, HIGH  # routing band, mirrored from config.LLM_TRIAGE
 
 # Aggregate discriminators from error_analysis.py's FP-vs-TN / FN-vs-TP tables
 # (results/current/error_analysis_results/<ds>/). Population-level facts, not
@@ -71,26 +77,47 @@ def arbitration_accuracy(arb_df):
     return pd.DataFrame(out)
 
 
+def _effect_rows(y, base, withllm, fold_label):
+    out = []
+    for name, pred in [("cascade@0.5thr", base), ("cascade+llm", withllm)]:
+        out.append({"pipeline": name, "fold": fold_label,
+                    "f1": f1_score(y, pred, zero_division=0),
+                    "recall": recall_score(y, pred, zero_division=0),
+                    "fpr": _fpr(y, pred)})
+    return out
+
+
 def pipeline_effect(arb_df, oof_df):
     o = oof_df.copy()
     y = o["true_label"].astype(int).values
-    base = ((0.5 * o["proba_xgb"] + 0.5 * o["proba_cnn"]) >= 0.5).astype(int).values
+    px = o["proba_xgb"].to_numpy(dtype=float)
+    pc = o["proba_cnn"].to_numpy(dtype=float)
+    # Mirror hybrid_cascade.cascade_predict: blend only inside the routing band,
+    # raw xgb_proba outside; then threshold at 0.5 (the one approximation).
+    blend = 0.5 * px + 0.5 * pc
+    routed = (px >= LOW) & (px <= HIGH)
+    final = np.where(routed, blend, px)
+    base = (final >= 0.5).astype(int)
+
     sub = {int(r.row_id): int(r.llm_pred) for r in arb_df.itertuples()
            if int(r.llm_pred) in (0, 1)}
-    idx = {rid: i for i, rid in enumerate(o["row_id"].astype(int).values)}
+    row_ids = o["row_id"].astype(int).values
     withllm = base.copy()
-    for rid, p in sub.items():
-        if rid in idx:
-            withllm[idx[rid]] = p
+    for i, rid in enumerate(row_ids):
+        if rid in sub:
+            withllm[i] = sub[rid]
+
     rows = []
-    for name, pred in [("cascade_blend@0.5", base), ("cascade+llm", withllm)]:
-        rows.append({"pipeline": name,
-                     "f1": f1_score(y, pred, zero_division=0),
-                     "recall": recall_score(y, pred, zero_division=0),
-                     "fpr": _fpr(y, pred)})
+    if "fold" in o.columns:
+        for fv in sorted(o["fold"].unique(), key=str):
+            m = (o["fold"].values == fv)
+            rows += _effect_rows(y[m], base[m], withllm[m], str(fv))
+    rows += _effect_rows(y, base, withllm, "pooled")
     eff = pd.DataFrame(rows)
-    delta = (eff.set_index("pipeline").loc["cascade+llm"]
-             - eff.set_index("pipeline").loc["cascade_blend@0.5"])
+
+    pooled = eff[eff["fold"] == "pooled"].set_index("pipeline")
+    cols = ["f1", "recall", "fpr"]
+    delta = pooled.loc["cascade+llm", cols] - pooled.loc["cascade@0.5thr", cols]
     return eff, delta
 
 
@@ -166,9 +193,14 @@ def write_report_section(dataset_key, model_tag, acc_df, eff_df, eff_delta, ece,
         f"(parse-failure rate {parse_rate:.1%})", "",
         "**Accuracy on the contradiction set**", "",
         acc_df.to_markdown(index=False), "",
-        "**Whole-population pipeline effect (blend@0.5 baseline)**", "",
+        "**Whole-population pipeline effect (per-fold + pooled)**", "",
+        "_`cascade@0.5thr` mirrors `hybrid_cascade.cascade_predict` exactly "
+        "(0.5/0.5 blend inside the [0.3, 0.7] routing band, raw XGBoost probability "
+        "outside). The ONE remaining approximation: the real cascade selects its "
+        "cutoff per-fold as the F1-optimal threshold under MAX_FPR=0.05; this table "
+        "thresholds at 0.5. Rows differ from the cascade only in that cutoff._", "",
         eff_df.to_markdown(index=False), "",
-        f"- Delta vs baseline: F1 {eff_delta['f1']:+.4f}, "
+        f"- Delta vs baseline (pooled): F1 {eff_delta['f1']:+.4f}, "
         f"recall {eff_delta['recall']:+.4f}, FPR {eff_delta['fpr']:+.4f}", "",
         "**Reasoning quality**", "",
         f"- Expected Calibration Error: {ece:.4f}",

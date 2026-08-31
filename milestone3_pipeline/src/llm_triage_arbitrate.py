@@ -19,6 +19,10 @@ import pandas as pd
 
 from config import LLM_TRIAGE, DATASETS
 
+# Shape of the client's parse_error return; reused to build a call_error record.
+_EMPTY_RESULT = {"verdict": None, "confidence": None, "rationale_steps": [],
+                 "key_features": [], "agrees_with": None}
+
 
 def _modeltag(model_id):
     tail = model_id.rsplit("/", 1)[-1].lower()
@@ -54,6 +58,7 @@ def arbitrate_dataset(dataset_key, data_dir, out_dir, model_id=None, backend=Non
     from llm_triage_stats import compute_percentile_tables
     from llm_triage_context import build_context
     from llm_triage_client import LLMClient
+    from feature_selection import select_features
     from ingestion import ingest
 
     model_id = model_id or LLM_TRIAGE["model_id"]
@@ -61,38 +66,59 @@ def arbitrate_dataset(dataset_key, data_dir, out_dir, model_id=None, backend=Non
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    from feature_selection import select_features
+    # One ingest for the whole call -- reused by both branches below and by the
+    # percentile tables.
+    ds = ingest(dataset_key, data_dir=data_dir)
+
     dump_csv = out_dir / f"{dataset_key}_contradictions.csv"
     oof_csv = out_dir / f"{dataset_key}_cascade_oof.csv"
     if dump_csv.exists() and oof_csv.exists():
         contra = pd.read_csv(dump_csv)
-        feat_cols = select_features(ingest(dataset_key, data_dir=data_dir).feat_cols,
-                                    dataset_key, policy="full")
+        feat_cols = select_features(ds.feat_cols, dataset_key, policy="full")
+        contra = stratified_subsample(contra, max_cases, seed)  # no-op when under cap
+        print(f"[llm_triage_arbitrate] reusing {dump_csv} + {oof_csv} "
+              f"({len(contra)} contradiction rows)", flush=True)
     else:
         contra, _oof, feat_cols = find_contradictions(dataset_key, data_dir, seed=seed)
         contra = stratified_subsample(contra, max_cases, seed)
 
-    ds = ingest(dataset_key, data_dir=data_dir)
     label_col = DATASETS[dataset_key]["label_col"]
     pct = compute_percentile_tables(ds.df, feat_cols, label_col)
     (out_dir / f"{dataset_key}_percentiles.json").write_text(json.dumps(pct))
 
+    path = out_dir / f"{dataset_key}_{_modeltag(model_id)}_llm_arbitration.csv"
+
+    # Resume: seed `rows` from an existing partial CSV and skip its row_ids.
+    rows, done_ids = [], set()
+    if path.exists():
+        prev = pd.read_csv(path)
+        rows = prev.to_dict("records")
+        done_ids = set(prev["row_id"].astype(int)) if "row_id" in prev.columns else set()
+        print(f"[llm_triage_arbitrate] resuming: {len(done_ids)} rows already in {path}",
+              flush=True)
+
     client = client or LLMClient(model_id=model_id, backend=backend)
-    rows = []
     for i, (_, r) in enumerate(contra.iterrows()):
+        if int(r["row_id"]) in done_ids:
+            continue
         ctx = build_context(r, feat_cols, pct, dataset_key)
-        res = client.arbitrate(ctx)
+        try:
+            res = client.arbitrate(ctx)
+        except Exception as e:  # a single bad call must not abort the batch
+            res = dict(_EMPTY_RESULT)
+            res.update({"parse_status": "call_error", "raw": repr(e)})
         rows.append(assemble_row(r, feat_cols, res))
         if (i + 1) % 25 == 0:
+            pd.DataFrame(rows).to_csv(path, index=False)  # incremental checkpoint
             print(f"[llm_triage_arbitrate] {dataset_key}/{_modeltag(model_id)}: "
                   f"{i + 1}/{len(contra)}", flush=True)
 
     df = pd.DataFrame(rows)
-    path = out_dir / f"{dataset_key}_{_modeltag(model_id)}_llm_arbitration.csv"
     df.to_csv(path, index=False)
-    n_err = (df["parse_status"] == "parse_error").sum() if len(df) else 0
-    print(f"[llm_triage_arbitrate] wrote {path}  ({len(df)} rows, {n_err} parse_error)",
-          flush=True)
+    n_err = int((df["parse_status"] == "parse_error").sum()) if len(df) else 0
+    n_call_err = int((df["parse_status"] == "call_error").sum()) if len(df) else 0
+    print(f"[llm_triage_arbitrate] wrote {path}  ({len(df)} rows, "
+          f"{n_err} parse_error, {n_call_err} call_error)", flush=True)
     return df
 
 

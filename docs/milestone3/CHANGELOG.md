@@ -573,9 +573,11 @@ isolates whether the domain tuning helps on our edge cases.
 **Context window:** each contradiction row is rendered as 20 raw feature values
 with dual benign/attack percentile ranks, an auto-flagged "notable deviations"
 list, and an aggregate "known failure patterns" block distilled from
-`error_analysis.py`'s FP-vs-TN / FN-vs-TP tables. The model returns guided JSON
-(`verdict`, `confidence`, 5-step `rationale_steps`, `key_features`, `agrees_with`).
-The row's `technique` label is never shown -- context is family-level only.
+`error_analysis.py`'s FP-vs-TN / FN-vs-TP tables. The model returns JSON
+(`verdict`, `confidence`, 5-step `rationale_steps`, `key_features`, `agrees_with`)
+via schema-guided decoding where the backend supports it, backed by JSON-schema
+validation and a single repair retry. The row's `technique` label is never shown
+-- context is family-level only.
 
 **Disclosure:** percentile tables and the known-failure block are computed from
 labelled data (descriptive context, not model fitting) -- same disclosure class

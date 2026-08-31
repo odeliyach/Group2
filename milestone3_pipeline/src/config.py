@@ -210,7 +210,8 @@ LLM_TRIAGE = {
     "sampling_seed": 42,
     "temperature": 0.0,
     "max_cases_per_dataset": 400,        # stratified cap; bounds LLM cost
-    "cascade_low_thresh": 0.3,           # routing band, mirrors hybrid_cascade.py defaults
+    # mirrors hybrid_cascade.cascade_predict low_thresh/high_thresh defaults -- keep in sync
+    "cascade_low_thresh": 0.3,
     "cascade_high_thresh": 0.7,
     "schema_version": "v1",
 }

@@ -1,7 +1,8 @@
 """Milestone 3 -- Step 8 capstone: the LLM arbitration client.
 
-Deterministic decoding (temperature 0, fixed seed), guided by ARBITRATION_SCHEMA_V1.
-On invalid output: exactly one repair retry, then parse_status="parse_error".
+Deterministic decoding (temperature 0, fixed seed), with schema-guided decoding
+where the backend supports it, backed by JSON-schema validation and a single
+repair retry. On still-invalid output: parse_status="parse_error".
 Two backends: "vllm" (cluster GPU, lazy-imported) and "ollama" (local HTTP fallback).
 Tests subclass LLMClient and override _generate -- no network or GPU needed.
 """
@@ -70,6 +71,8 @@ class LLMClient:
         r = requests.post(
             "http://localhost:11434/api/generate",
             json={"model": self.model_id, "prompt": prompt, "stream": False,
+                  # Modern Ollama constrains output to a JSON schema via `format`.
+                  "format": ARBITRATION_SCHEMA_V1,
                   "options": {"temperature": self.temperature, "seed": self.seed,
                               "num_predict": self.max_new_tokens}},
             timeout=600,
@@ -82,8 +85,15 @@ class LLMClient:
             from vllm import LLM, SamplingParams
             self._engine = LLM(model=self.model_id, dtype="bfloat16",
                                max_model_len=4096, gpu_memory_utilization=0.90)
-            self._sp = SamplingParams(temperature=self.temperature, seed=self.seed,
-                                      max_tokens=self.max_new_tokens)
+            kw = dict(temperature=self.temperature, seed=self.seed,
+                      max_tokens=self.max_new_tokens)
+            try:
+                # Newer vLLM: constrain decoding to the schema; older builds lack this.
+                from vllm.sampling_params import GuidedDecodingParams
+                self._sp = SamplingParams(
+                    guided_decoding=GuidedDecodingParams(json=ARBITRATION_SCHEMA_V1), **kw)
+            except (ImportError, TypeError):
+                self._sp = SamplingParams(**kw)
         return self._engine.generate([prompt], self._sp)[0].outputs[0].text
 
     # -- public API -----------------------------------------------------

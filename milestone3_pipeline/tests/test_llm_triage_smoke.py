@@ -3,7 +3,6 @@ pulled: `ollama pull llama3.1:8b`. Run explicitly with:  pytest -m slow
 Asserts only that the pipeline produces a schema-valid decision, never that the
 decision is correct.
 """
-import json
 import pytest
 import config
 import llm_triage_context as C

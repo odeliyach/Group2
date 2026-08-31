@@ -34,13 +34,22 @@ BACKEND="vllm"
 DATASETS=(camlds camlds casino casino)
 MODELS=(fdtn-ai/Foundation-Sec-8B-Instruct meta-llama/Llama-3.1-8B-Instruct \
         fdtn-ai/Foundation-Sec-8B-Instruct meta-llama/Llama-3.1-8B-Instruct)
+# Local Ollama tags, parallel to MODELS -- adjust to your pulled tags.
+OLLAMA_MODELS=(foundation-sec:8b-instruct llama3.1:8b \
+               foundation-sec:8b-instruct llama3.1:8b)
 
 DATASET=${DATASETS[$SLURM_ARRAY_TASK_ID]}
-MODEL=${MODELS[$SLURM_ARRAY_TASK_ID]}
+VLLM_MODEL=${MODELS[$SLURM_ARRAY_TASK_ID]}
+if [ "$BACKEND" == "ollama" ]; then
+    MODEL=${OLLAMA_MODELS[$SLURM_ARRAY_TASK_ID]}
+else
+    MODEL=${MODELS[$SLURM_ARRAY_TASK_ID]}
+fi
 
 if [ "$DATASET" == "camlds" ]; then DATA_DIR="data/v3"; else DATA_DIR="data"; fi
 OUT_DIR="$OUT_ROOT/$DATASET"
-MODEL_TAG=$(echo "$MODEL" | sed 's#.*/##; s#[^A-Za-z0-9]#-#g' | tr 'A-Z' 'a-z')
+# Derived from the vllm MODELS entry so output filenames are stable across backends.
+MODEL_TAG=$(echo "$VLLM_MODEL" | sed 's#.*/##; s#[^A-Za-z0-9]#-#g' | tr 'A-Z' 'a-z')
 
 mkdir -p logs "$OUT_DIR"
 
@@ -55,12 +64,14 @@ echo "============================================"
 $PYTHON "$SCRIPTS_DIR/llm_triage_dump.py" \
     --dataset "$DATASET" --data-dir "$DATA_DIR" --out "$OUT_DIR"
 RC=$?
-if [ $RC -ne 0 ]; then echo "dump failed"; exit $RC; fi
+if [ $RC -ne 0 ]; then echo "dump failed"; fi
 
-$PYTHON "$SCRIPTS_DIR/llm_triage_arbitrate.py" \
-    --dataset "$DATASET" --data-dir "$DATA_DIR" --out "$OUT_DIR" \
-    --model "$MODEL" --backend "$BACKEND"
-RC=$?
+if [ $RC -eq 0 ]; then
+    $PYTHON "$SCRIPTS_DIR/llm_triage_arbitrate.py" \
+        --dataset "$DATASET" --data-dir "$DATA_DIR" --out "$OUT_DIR" \
+        --model "$MODEL" --backend "$BACKEND"
+    RC=$?
+fi
 
 if [ $RC -eq 0 ]; then
     $PYTHON "$SCRIPTS_DIR/llm_triage_evaluate.py" \

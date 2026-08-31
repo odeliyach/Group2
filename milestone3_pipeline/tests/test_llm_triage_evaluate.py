@@ -36,12 +36,18 @@ def test_arbitration_accuracy_excludes_parse_errors_and_scores_llm():
 def test_pipeline_effect_substitutes_llm_on_contradiction_rows():
     oof = pd.DataFrame({
         "row_id": [0, 1, 2, 3, 4, 5],
+        "fold": [0, 0, 1, 1, 0, 1],
         "true_label": [1, 0, 1, 0, 1, 0],
         "proba_xgb": [0.45, 0.60, 0.40, 0.55, 0.20, 0.90],
         "proba_cnn": [0.80, 0.30, 0.66, 0.20, 0.10, 0.95],
     })
     eff, delta = E.pipeline_effect(_arb(), oof)
-    assert set(eff["pipeline"]) == {"cascade_blend@0.5", "cascade+llm"}
+    assert set(eff["pipeline"]) == {"cascade@0.5thr", "cascade+llm"}
+    assert "fold" in eff.columns
+    assert "pooled" in set(eff["fold"])
+    # one (cascade@0.5thr, cascade+llm) pair per fold + the pooled pair
+    assert (eff["fold"] == "pooled").sum() == 2
+    assert set(eff.loc[eff["fold"] == "pooled", "pipeline"]) == {"cascade@0.5thr", "cascade+llm"}
     assert "f1" in delta.index and "fpr" in delta.index
 
 

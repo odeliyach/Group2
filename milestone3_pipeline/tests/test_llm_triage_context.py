@@ -1,4 +1,3 @@
-import numpy as np
 import config
 import llm_triage_context as C
 

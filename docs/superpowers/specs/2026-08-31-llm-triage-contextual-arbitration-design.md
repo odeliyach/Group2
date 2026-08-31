@@ -467,8 +467,10 @@ of the LLM layer.
    in `config.py`.
 2. **Pooled OOF contradiction rows.** The four base models and the cascade are trained leak-free
    per fold, but the percentile tables span the entire dataset. Stated explicitly.
-3. **Decoding determinism.** `temperature = 0` + fixed seed + `guided_json`; residual
-   batch-order non-determinism from vLLM is possible and is documented rather than eliminated.
+3. **Decoding determinism.** `temperature = 0` + fixed seed, with schema-guided decoding where
+   the backend supports it (vLLM `GuidedDecodingParams`, Ollama `format`), backed by JSON-schema
+   validation and a single repair retry; residual batch-order non-determinism from vLLM is
+   possible and is documented rather than eliminated.
 4. **Engine caveats.** Foundation-Sec-8B-Instruct has a 4,096-token context window and no
    post-April-2025 knowledge; the vendor states it is not intended for autonomous security
    decisions without human review. Here it is graded offline against ground truth, never deployed.
