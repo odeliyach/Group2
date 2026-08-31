@@ -172,3 +172,45 @@ CV_CONFIG = {
 # precision faster than it buys recall. See
 # operating_curve_results/camlds_rf_operating_curve.csv for the full sweep.
 MAX_FPR = 0.05
+
+# =====================================================================
+# Step 8 capstone -- LLM-Driven Triage and Contextual Arbitration
+# =====================================================================
+
+# One-line SOC-analyst gloss per feature, shown verbatim in the LLM context
+# window (see llm_triage_context.build_context). Keys MUST match FULL_FEATURE_LIST.
+FEATURE_GLOSS = {
+    "lifetime_seconds": "process wall-clock lifetime",
+    "events_per_second": "syscall throughput",
+    "seq_length": "length of the syscall sequence",
+    "unique_syscalls": "distinct syscall types used",
+    "uid_is_root": "process real UID is root",
+    "uid_changed": "UID changed during the process lifetime",
+    "euid_root": "effective UID is root",
+    "max_uid_euid_delta": "largest gap between real and effective UID; large = privilege transition",
+    "is_suid_exec": "executed a setuid/setgid binary",
+    "auid_euid_mismatch": "audit (login) UID differs from effective UID; identity inconsistency",
+    "ephemeral_privileged": "short-lived process that held privilege",
+    "failed_call_rate": "fraction of syscalls that returned an error",
+    "failed_call_count": "absolute count of failed syscalls",
+    "priv_op_count": "count of privileged operations (setuid, capset, ...)",
+    "exec_count": "number of exec() calls",
+    "file_access_count": "file-access syscalls",
+    "network_count": "network-related syscalls",
+    "shell_from_service": "a shell was spawned from a service/daemon context",
+    "sensitive_path_access": "touched a sensitive path (/etc/shadow, /etc/sudoers, ...)",
+    "parent_child_rarity": "rarity of this parent->child exec pair (1 = never seen before)",
+}
+
+LLM_TRIAGE = {
+    "model_id": "fdtn-ai/Foundation-Sec-8B-Instruct",      # security-tuned primary
+    "control_model_id": "meta-llama/Llama-3.1-8B-Instruct",  # general-purpose A/B control
+    "backend": "vllm",                                       # "vllm" (cluster) or "ollama" (fallback)
+    "max_new_tokens": 800,
+    "sampling_seed": 42,
+    "temperature": 0.0,
+    "max_cases_per_dataset": 400,        # stratified cap; bounds LLM cost
+    "cascade_low_thresh": 0.3,           # routing band, mirrors hybrid_cascade.py defaults
+    "cascade_high_thresh": 0.7,
+    "schema_version": "v1",
+}
