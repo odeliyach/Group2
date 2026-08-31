@@ -48,8 +48,8 @@ fi
 
 if [ "$DATASET" == "camlds" ]; then DATA_DIR="data/v3"; else DATA_DIR="data"; fi
 OUT_DIR="$OUT_ROOT/$DATASET"
-# Derived from the vllm MODELS entry so output filenames are stable across backends.
-MODEL_TAG=$(echo "$VLLM_MODEL" | sed 's#.*/##; s#[^A-Za-z0-9]#-#g' | tr 'A-Z' 'a-z')
+# Derive MODEL_TAG from the selected $MODEL variable, not VLLM_MODEL
+MODEL_TAG=$(echo "$MODEL" | sed 's#.*/##' | tr 'A-Z' 'a-z' | sed -E 's#[^a-z0-9]+#-#g; s#^-+##; s#-+$##')
 
 mkdir -p logs "$OUT_DIR"
 

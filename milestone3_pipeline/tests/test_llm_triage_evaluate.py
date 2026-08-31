@@ -5,7 +5,7 @@ import llm_triage_evaluate as E
 
 
 def _arb():
-    # 4 usable rows + 1 parse_error that must be ignored by arbitration_accuracy
+    # 4 usable rows + 1 parse_error + 1 call_error that must be ignored by arbitration_accuracy
     def kf(x):
         return json.dumps(x)
     return pd.DataFrame([
@@ -19,6 +19,8 @@ def _arb():
              llm_pred=1, llm_confidence=0.6, parse_status="ok", key_features=kf(["seq_length"])),
         dict(row_id=4, true_label=1, pred_xgb=0, pred_cnn=1, proba_xgb=0.50, proba_cnn=0.70,
              llm_pred=-1, llm_confidence=None, parse_status="parse_error", key_features=kf([])),
+        dict(row_id=5, true_label=0, pred_xgb=1, pred_cnn=0, proba_xgb=0.55, proba_cnn=0.20,
+             llm_pred=-1, llm_confidence=None, parse_status="call_error", key_features=kf([])),
     ])
 
 
@@ -31,6 +33,12 @@ def test_arbitration_accuracy_excludes_parse_errors_and_scores_llm():
     assert abs(acc.loc["always_xgb", "accuracy"] - 0.0) < 1e-9
     # always_cnn preds = [1,0,1,0] -> 4/4
     assert abs(acc.loc["always_cnn", "accuracy"] - 1.0) < 1e-9
+
+
+def test_arbitration_accuracy_excludes_call_errors():
+    acc = E.arbitration_accuracy(_arb()).set_index("strategy")
+    # Should exclude both parse_error (row 4) and call_error (row 5), leaving 4 usable rows
+    assert acc.loc["llm", "n"] == 4
 
 
 def test_pipeline_effect_substitutes_llm_on_contradiction_rows():

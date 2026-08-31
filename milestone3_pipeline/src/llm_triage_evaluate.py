@@ -31,6 +31,9 @@ from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_s
 
 from llm_triage_dump import LOW, HIGH  # routing band, mirrored from config.LLM_TRIAGE
 
+# Parse/call failure statuses that should be excluded from evaluation
+FAILED_STATUSES = ("parse_error", "call_error")
+
 # Aggregate discriminators from error_analysis.py's FP-vs-TN / FN-vs-TP tables
 # (results/current/error_analysis_results/<ds>/). Population-level facts, not
 # row-level -- safe to show the model as "known failure patterns".
@@ -51,7 +54,7 @@ def _fpr(y_true, y_pred):
 
 
 def arbitration_accuracy(arb_df):
-    d = arb_df[arb_df["parse_status"] != "parse_error"].copy()
+    d = arb_df[~arb_df["parse_status"].isin(FAILED_STATUSES)].copy()
     y = d["true_label"].astype(int).values
     px, pc = d["proba_xgb"].values, d["proba_cnn"].values
     more_conf = np.where(np.abs(px - 0.5) >= np.abs(pc - 0.5),
@@ -226,21 +229,24 @@ def main():
 
     acc = arbitration_accuracy(arb)
     eff, delta = pipeline_effect(arb, oof)
-    usable = arb[arb["parse_status"] != "parse_error"].copy()
+    usable = arb[~arb["parse_status"].isin(FAILED_STATUSES)].copy()
     correct = (usable["llm_pred"].astype(int) == usable["true_label"].astype(int)).astype(float).values
     ece = expected_calibration_error(usable["llm_confidence"].values, correct)
     kf = key_feature_overlap(arb, DISCRIMINATOR_FEATURES[args.dataset])
-    parse_rate = (arb["parse_status"] == "parse_error").mean() if len(arb) else float("nan")
+    parse_error_rate = (arb["parse_status"] == "parse_error").mean() if len(arb) else float("nan")
+    call_error_rate = (arb["parse_status"] == "call_error").mean() if len(arb) else float("nan")
+    failure_rate = arb["parse_status"].isin(FAILED_STATUSES).mean() if len(arb) else float("nan")
 
     acc.to_csv(out_dir / f"{args.dataset}_{model_tag}_arbitration_metrics.csv", index=False)
     eff.to_csv(out_dir / f"{args.dataset}_{model_tag}_pipeline_effect.csv", index=False)
-    pd.DataFrame([{"ece": ece, "key_feature_overlap": kf, "parse_error_rate": parse_rate}]).to_csv(
+    pd.DataFrame([{"ece": ece, "key_feature_overlap": kf, "parse_error_rate": parse_error_rate,
+                   "call_error_rate": call_error_rate, "failure_rate": failure_rate}]).to_csv(
         out_dir / f"{args.dataset}_{model_tag}_reasoning_quality.csv", index=False)
     plot_accuracy_bars(acc, f"{args.dataset} / {model_tag}",
                        out_dir / f"{args.dataset}_{model_tag}_accuracy.png")
     plot_reliability(usable["llm_confidence"].values, correct,
                      out_dir / f"{args.dataset}_{model_tag}_calibration.png")
-    write_report_section(args.dataset, model_tag, acc, eff, delta, ece, kf, parse_rate,
+    write_report_section(args.dataset, model_tag, acc, eff, delta, ece, kf, parse_error_rate,
                          out_dir / f"{args.dataset}_{model_tag}_report_section.md")
     print(f"[llm_triage_evaluate] wrote metrics + charts + report section to {out_dir}",
           flush=True)
