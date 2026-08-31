@@ -77,6 +77,8 @@ and finding) and `docs/milestone3/experiment_log.html` for a summary.
   cross-dataset evaluation done. In progress: sample-level error analysis (CasinoLimit vs.
   regenerated CAM-LDS). 
 
-  Not yet started:
-- hybrid cascade (Isolation Forest → supervised)
-- LLM triage layer (Step 8 capstone)
+  Step 8 capstone:
+- hybrid cascade — implemented (`milestone3_pipeline/src/hybrid_cascade*.py`; XGBoost→CNN,
+  plus RF-stage-2 and weighted variants)
+- LLM triage layer — implemented (`milestone3_pipeline/src/llm_triage_*.py`; offline
+  contextual arbitration over cascade contradictions, `run_scripts/run_llm_triage.sh`)

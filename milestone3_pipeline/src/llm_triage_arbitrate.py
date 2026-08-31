@@ -61,8 +61,16 @@ def arbitrate_dataset(dataset_key, data_dir, out_dir, model_id=None, backend=Non
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    contra, _oof, feat_cols = find_contradictions(dataset_key, data_dir, seed=seed)
-    contra = stratified_subsample(contra, max_cases, seed)
+    from feature_selection import select_features
+    dump_csv = out_dir / f"{dataset_key}_contradictions.csv"
+    oof_csv = out_dir / f"{dataset_key}_cascade_oof.csv"
+    if dump_csv.exists() and oof_csv.exists():
+        contra = pd.read_csv(dump_csv)
+        feat_cols = select_features(ingest(dataset_key, data_dir=data_dir).feat_cols,
+                                    dataset_key, policy="full")
+    else:
+        contra, _oof, feat_cols = find_contradictions(dataset_key, data_dir, seed=seed)
+        contra = stratified_subsample(contra, max_cases, seed)
 
     ds = ingest(dataset_key, data_dir=data_dir)
     label_col = DATASETS[dataset_key]["label_col"]

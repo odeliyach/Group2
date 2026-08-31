@@ -555,3 +555,37 @@ comparison in the report.
 - **Casino de-duplication for CNN training** — discussed as a way to
   stabilize CNN training (train on 356 unique rows with sample weights
   instead of 91k duplicated rows), not yet implemented.
+
+---
+
+## 13. LLM-driven triage & contextual arbitration (Step 8 capstone)
+
+**What was built:** an offline LLM arbitrator (`src/llm_triage_*.py`) for the
+rows where the hybrid cascade's two models contradict each other -- routed
+(XGBoost probability in the 0.3-0.7 band) AND `pred_xgb != pred_cnn`, evaluated
+out-of-fold with the same `train_eval._FITTERS` as the headline pipeline.
+
+**Engine:** `fdtn-ai/Foundation-Sec-8B-Instruct` (Cisco Foundation AI,
+Llama-3.1-8B backbone, security-tuned; 4,096-token context). Control model:
+`meta-llama/Llama-3.1-8B-Instruct`, identical architecture, no security tuning --
+isolates whether the domain tuning helps on our edge cases.
+
+**Context window:** each contradiction row is rendered as 20 raw feature values
+with dual benign/attack percentile ranks, an auto-flagged "notable deviations"
+list, and an aggregate "known failure patterns" block distilled from
+`error_analysis.py`'s FP-vs-TN / FN-vs-TP tables. The model returns guided JSON
+(`verdict`, `confidence`, 5-step `rationale_steps`, `key_features`, `agrees_with`).
+The row's `technique` label is never shown -- context is family-level only.
+
+**Disclosure:** percentile tables and the known-failure block are computed from
+labelled data (descriptive context, not model fitting) -- same disclosure class
+as `IFOREST_NOVELTY_MODE`.
+
+**Evaluation (`llm_triage_evaluate.py`):** arbitration accuracy vs 5 baselines
+(always-XGB, always-CNN, trust-more-confident, blend@0.5, majority class);
+whole-population pipeline F1/FPR/recall delta; confidence ECE; `key_features`
+overlap with the error-analysis discriminators; parse-failure rate.
+
+**Run:** `sbatch milestone3_pipeline/run_scripts/run_llm_triage.sh` (array over
+{camlds, casino} x {foundation-sec, llama-3.1}). Ollama-GGUF fallback documented
+in the script header.
