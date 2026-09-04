@@ -49,6 +49,7 @@ def assemble_row(contra_row, feat_cols, llm_result):
         "parse_status": llm_result.get("parse_status"),
         "rationale_steps": json.dumps(llm_result.get("rationale_steps", [])),
         "key_features": json.dumps(llm_result.get("key_features", [])),
+        "raw": llm_result.get("raw"),
     }
 
 
@@ -98,6 +99,7 @@ def arbitrate_dataset(dataset_key, data_dir, out_dir, model_id=None, backend=Non
               flush=True)
 
     client = client or LLMClient(model_id=model_id, backend=backend)
+    error_logged = False
     for i, (_, r) in enumerate(contra.iterrows()):
         if int(r["row_id"]) in done_ids:
             continue
@@ -107,6 +109,10 @@ def arbitrate_dataset(dataset_key, data_dir, out_dir, model_id=None, backend=Non
         except Exception as e:  # a single bad call must not abort the batch
             res = dict(_EMPTY_RESULT)
             res.update({"parse_status": "call_error", "raw": repr(e)})
+            if not error_logged:
+                print(f"[llm_triage_arbitrate] first call_error (row_id={int(r['row_id'])}): "
+                      f"{repr(e)}", flush=True)
+                error_logged = True
         rows.append(assemble_row(r, feat_cols, res))
         if (i + 1) % 25 == 0:
             pd.DataFrame(rows).to_csv(path, index=False)  # incremental checkpoint
