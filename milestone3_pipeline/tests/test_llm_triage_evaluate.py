@@ -41,6 +41,37 @@ def test_arbitration_accuracy_excludes_call_errors():
     assert acc.loc["llm", "n"] == 4
 
 
+def test_arbitration_accuracy_handles_all_rows_failed_without_crashing():
+    # Reproduces the real failure: every LLM call errored, so nothing survives
+    # the parse_status filter. precision/recall/f1 must not raise on an empty
+    # y_true/y_pred (sklearn does by default) -- they should read as NaN.
+    cols = ["row_id", "true_label", "pred_xgb", "pred_cnn", "proba_xgb", "proba_cnn",
+            "llm_pred", "llm_confidence", "parse_status", "key_features"]
+    all_failed = pd.DataFrame([
+        dict(row_id=0, true_label=1, pred_xgb=0, pred_cnn=1, proba_xgb=0.45, proba_cnn=0.80,
+             llm_pred=-1, llm_confidence=None, parse_status="call_error", key_features="[]"),
+        dict(row_id=1, true_label=0, pred_xgb=1, pred_cnn=0, proba_xgb=0.60, proba_cnn=0.30,
+             llm_pred=-1, llm_confidence=None, parse_status="parse_error", key_features="[]"),
+    ], columns=cols)
+    acc = E.arbitration_accuracy(all_failed).set_index("strategy")
+    assert acc.loc["llm", "n"] == 0
+    assert np.isnan(acc.loc["llm", "accuracy"])
+    assert np.isnan(acc.loc["llm", "precision"])
+    assert np.isnan(acc.loc["llm", "recall"])
+    assert np.isnan(acc.loc["llm", "f1"])
+
+
+def test_arbitration_accuracy_handles_zero_contradiction_rows():
+    # Reproduces the other real case: a dataset with no contradiction rows at
+    # all this run -- an empty but properly-columned arbitration frame.
+    cols = ["row_id", "true_label", "pred_xgb", "pred_cnn", "proba_xgb", "proba_cnn",
+            "llm_pred", "llm_confidence", "parse_status", "key_features"]
+    empty = pd.DataFrame(columns=cols)
+    acc = E.arbitration_accuracy(empty)
+    assert (acc["n"] == 0).all()
+    assert acc["accuracy"].isna().all()
+
+
 def test_pipeline_effect_substitutes_llm_on_contradiction_rows():
     oof = pd.DataFrame({
         "row_id": [0, 1, 2, 3, 4, 5],

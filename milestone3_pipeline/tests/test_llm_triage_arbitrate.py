@@ -11,6 +11,17 @@ import config
 import llm_triage_arbitrate as A
 
 
+def test_zero_row_arbitration_csv_still_has_a_header(tmp_path):
+    # Reproduces the real failure: a dataset with zero contradiction rows this
+    # run produced a 2-byte file (blank line only) that pd.read_csv can't parse.
+    # A zero-row frame built with the fixed column list must round-trip cleanly.
+    path = tmp_path / "empty_llm_arbitration.csv"
+    pd.DataFrame([], columns=A._ARBITRATION_COLUMNS).to_csv(path, index=False)
+    read_back = pd.read_csv(path)  # must not raise EmptyDataError
+    assert list(read_back.columns) == A._ARBITRATION_COLUMNS
+    assert len(read_back) == 0
+
+
 def test_assemble_row_maps_verdict_to_pred_and_serialises_lists():
     contra = {
         "row_id": 7, "fold": 2, "true_label": 1, "technique": "T1548",

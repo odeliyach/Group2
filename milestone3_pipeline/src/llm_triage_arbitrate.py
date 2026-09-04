@@ -23,6 +23,16 @@ from config import LLM_TRIAGE, DATASETS
 _EMPTY_RESULT = {"verdict": None, "confidence": None, "rationale_steps": [],
                  "key_features": [], "agrees_with": None}
 
+# assemble_row()'s output schema, fixed so a zero-row arbitration CSV (a dataset
+# with no contradictions this run) still gets a header -- pd.DataFrame([]).to_csv()
+# writes no columns at all, which makes pd.read_csv raise EmptyDataError downstream.
+_ARBITRATION_COLUMNS = [
+    "row_id", "fold", "true_label", "technique", "pred_xgb", "pred_cnn",
+    "proba_xgb", "proba_cnn", "disagreement_direction", "llm_verdict", "llm_pred",
+    "llm_confidence", "llm_agrees_with", "parse_status", "rationale_steps",
+    "key_features", "raw",
+]
+
 
 def _modeltag(model_id):
     tail = model_id.rsplit("/", 1)[-1].lower()
@@ -115,11 +125,11 @@ def arbitrate_dataset(dataset_key, data_dir, out_dir, model_id=None, backend=Non
                 error_logged = True
         rows.append(assemble_row(r, feat_cols, res))
         if (i + 1) % 25 == 0:
-            pd.DataFrame(rows).to_csv(path, index=False)  # incremental checkpoint
+            pd.DataFrame(rows, columns=_ARBITRATION_COLUMNS).to_csv(path, index=False)
             print(f"[llm_triage_arbitrate] {dataset_key}/{_modeltag(model_id)}: "
                   f"{i + 1}/{len(contra)}", flush=True)
 
-    df = pd.DataFrame(rows)
+    df = pd.DataFrame(rows, columns=_ARBITRATION_COLUMNS)
     df.to_csv(path, index=False)
     n_err = int((df["parse_status"] == "parse_error").sum()) if len(df) else 0
     n_call_err = int((df["parse_status"] == "call_error").sum()) if len(df) else 0

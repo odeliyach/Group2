@@ -69,14 +69,19 @@ def arbitration_accuracy(arb_df):
     }
     out = []
     for name, pred in strategies.items():
-        out.append({
-            "strategy": name,
-            "accuracy": accuracy_score(y, pred) if len(d) else float("nan"),
-            "precision": precision_score(y, pred, zero_division=0),
-            "recall": recall_score(y, pred, zero_division=0),
-            "f1": f1_score(y, pred, zero_division=0),
-            "n": int(len(d)),
-        })
+        if len(d):
+            row = {
+                "accuracy": accuracy_score(y, pred),
+                "precision": precision_score(y, pred, zero_division=0),
+                "recall": recall_score(y, pred, zero_division=0),
+                "f1": f1_score(y, pred, zero_division=0),
+            }
+        else:
+            # No rows survive the parse_error/call_error filter -- e.g. every LLM
+            # call failed, or the dataset had zero contradiction rows to begin with.
+            row = {"accuracy": float("nan"), "precision": float("nan"),
+                   "recall": float("nan"), "f1": float("nan")}
+        out.append({"strategy": name, "n": int(len(d)), **row})
     return pd.DataFrame(out)
 
 
