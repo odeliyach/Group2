@@ -1,0 +1,1 @@
+row_id,lifetime_seconds,events_per_second,seq_length,unique_syscalls,uid_is_root,uid_changed,euid_root,max_uid_euid_delta,auid_euid_mismatch,failed_call_rate,failed_call_count,priv_op_count,exec_count,file_access_count,network_count,shell_from_service,sensitive_path_access,fold,true_label,technique,pred_xgb,proba_xgb,pred_cnn,proba_cnn,disagreement_direction
