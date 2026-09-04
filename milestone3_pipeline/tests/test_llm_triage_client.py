@@ -21,6 +21,12 @@ class ScriptedClient(LC.LLMClient):
         return self._responses.pop(0)
 
 
+def test_cpu_offload_gb_defaults_to_config_and_is_overridable():
+    import config
+    assert LC.LLMClient(backend="ollama").cpu_offload_gb == config.LLM_TRIAGE["vllm_cpu_offload_gb"]
+    assert LC.LLMClient(backend="ollama", cpu_offload_gb=8).cpu_offload_gb == 8
+
+
 def test_valid_first_try_is_ok():
     c = ScriptedClient([json.dumps(VALID)])
     out = c.arbitrate("ctx")

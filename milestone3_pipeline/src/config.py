@@ -204,7 +204,8 @@ FEATURE_GLOSS = {
 
 LLM_TRIAGE = {
     "model_id": "fdtn-ai/Foundation-Sec-8B-Instruct",      # security-tuned primary
-    "control_model_id": "meta-llama/Llama-3.1-8B-Instruct",  # general-purpose A/B control
+    "control_model_id": "NousResearch/Meta-Llama-3.1-8B-Instruct",  # ungated mirror of the gated
+                                                                     # meta-llama/Llama-3.1-8B-Instruct
     "backend": "vllm",                                       # "vllm" (cluster) or "ollama" (fallback)
     "max_new_tokens": 800,
     "sampling_seed": 42,
@@ -214,4 +215,7 @@ LLM_TRIAGE = {
     "cascade_low_thresh": 0.3,
     "cascade_high_thresh": 0.7,
     "schema_version": "v1",
+    # GB of model weights vLLM may stream from host RAM instead of VRAM, so a
+    # bf16 8B model (~16 GB) fits a smaller GPU (e.g. a 12 GB titan). 0 = off.
+    "vllm_cpu_offload_gb": 0,
 }

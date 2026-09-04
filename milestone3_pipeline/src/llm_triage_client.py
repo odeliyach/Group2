@@ -48,13 +48,18 @@ def _try_parse(text):
 
 class LLMClient:
     def __init__(self, model_id=None, backend=None, max_new_tokens=None,
-                 temperature=None, seed=None):
+                 temperature=None, seed=None, cpu_offload_gb=None):
         c = LLM_TRIAGE
         self.model_id = model_id or c["model_id"]
         self.backend = backend or c["backend"]
         self.max_new_tokens = max_new_tokens or c["max_new_tokens"]
         self.temperature = c["temperature"] if temperature is None else temperature
         self.seed = c["sampling_seed"] if seed is None else seed
+        # GB of model weights vLLM may stream from host RAM instead of holding
+        # in VRAM -- lets a bf16 8B model (~16 GB) run on a GPU smaller than
+        # that (e.g. a 12 GB titan), at some latency cost. 0 = disabled.
+        self.cpu_offload_gb = (c.get("vllm_cpu_offload_gb", 0) if cpu_offload_gb is None
+                               else cpu_offload_gb)
         self._engine = None
         self._sp = None
 
@@ -83,8 +88,21 @@ class LLMClient:
     def _generate_vllm(self, prompt):
         if self._engine is None:
             from vllm import LLM, SamplingParams
-            self._engine = LLM(model=self.model_id, dtype="bfloat16",
-                               max_model_len=4096, gpu_memory_utilization=0.90)
+            engine_kw = dict(model=self.model_id, dtype="bfloat16",
+                             max_model_len=4096, gpu_memory_utilization=0.90)
+            if self.cpu_offload_gb:
+                engine_kw["cpu_offload_gb"] = self.cpu_offload_gb
+                try:
+                    self._engine = LLM(**engine_kw)
+                except TypeError:
+                    # Older vLLM without cpu_offload_gb -- retry without it rather
+                    # than silently running out of VRAM with no explanation.
+                    print("[llm_triage_client] this vLLM build has no cpu_offload_gb; "
+                          "retrying without offload (may OOM on a small GPU)", flush=True)
+                    del engine_kw["cpu_offload_gb"]
+                    self._engine = LLM(**engine_kw)
+            else:
+                self._engine = LLM(**engine_kw)
             kw = dict(temperature=self.temperature, seed=self.seed,
                       max_tokens=self.max_new_tokens)
             try:
