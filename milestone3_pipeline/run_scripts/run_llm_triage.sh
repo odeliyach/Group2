@@ -13,24 +13,22 @@
 #
 # Milestone 3 -- Step 8 capstone: LLM-Driven Triage and Contextual Arbitration.
 # One array task per (dataset x model): dump hybrid-cascade contradiction rows,
-# run the LLM arbitrator, then evaluate.
+# run the LLM arbitrator over them, then evaluate.
 #
-#   task 0: camlds  x  Foundation-Sec-8B-Instruct  (Q4 GGUF via Ollama)
-#   task 1: camlds  x  Llama-3.1-8B-Instruct       (Q4 GGUF via Ollama)
-#   task 2: casino  x  Foundation-Sec-8B-Instruct
-#   task 3: casino  x  Llama-3.1-8B-Instruct
+#   task 0: camlds  x  fdtn-ai/Foundation-Sec-8B-Instruct           (security-tuned)
+#   task 1: camlds  x  NousResearch/Meta-Llama-3.1-8B-Instruct      (general-purpose control)
+#   task 2: casino  x  fdtn-ai/Foundation-Sec-8B-Instruct
+#   task 3: casino  x  NousResearch/Meta-Llama-3.1-8B-Instruct
 #
-# studentkillable GPUs are titan (12 GB) / rtx_2080 (8 GB) -> no room for an 8B
-# model in bf16, so this runs 4-bit GGUF through a user-space Ollama server
-# started per job. Both models are Q4 so the security-vs-general comparison is
-# at matched precision -- state this in the write-up.
+# BACKEND=vllm, models loaded from $HF_HOME (pre-download with `hf download <id>`).
+# This account only has the `studentkillable` partition; its titan GPUs are
+# Titan Xp (compute capability 6.1), which CANNOT run bfloat16 -- hence
+# `--dtype float16` below. `--cpu-offload-gb 8` streams part of the ~16 GB of
+# weights from host RAM so an 8B fp16 model fits the 12 GB card.
+# If staff grant `killable` (RTX 3090 / A5000 / A6000 / L40S, >= 24 GB), switch
+# --partition/--gres and drop --dtype/--cpu-offload-gb for full-speed bf16.
 #
-# One-time, on a login node:
-#   export PATH=$LAB/ollama-bin/bin:$PATH ; export OLLAMA_MODELS=$LAB/ollama-models
-#   ollama serve & sleep 5
-#   ollama pull llama3.1:8b
-#   ollama pull hf.co/bartowski/Foundation-Sec-8B-Instruct-GGUF:Q4_K_M   # verify repo/tag on HF
-#
+# See docs/milestone3/llm_triage_runbook.md for setup, config and troubleshooting.
 # Submit from the repo ROOT:  sbatch milestone3_pipeline/run_scripts/run_llm_triage.sh
 
 LAB="/vol/joberant_nobck/data/NLP_368307701_2526a/alinl"
@@ -38,20 +36,23 @@ PYTHON="$LAB/envs/llmtriage/bin/python -u"
 SCRIPTS_DIR="milestone3_pipeline/src"
 OUT_ROOT="milestone3_pipeline/results/current/llm_triage"
 BACKEND="vllm"
+DTYPE="float16"          # "bfloat16" only on compute capability >= 8.0 (Ampere+)
+CPU_OFFLOAD_GB="8"       # host-RAM weight streaming so fp16 8B fits a 12 GB titan; 0 = off
 
-export TMPDIR="$LAB/tmp"; mkdir -p "$TMPDIR"
-export HF_HOME="$LAB/hf_cache"          # unused by the ollama path; kept for a vllm switch-back
+# The batch shell does NOT inherit login-shell exports. Home quota is tiny, so
+# push every cache onto the lab volume.
+export HF_HOME="$LAB/hf_cache"
+export TMPDIR="$LAB/tmp";           mkdir -p "$TMPDIR"
+export MPLCONFIGDIR="$LAB/tmp/mpl"; mkdir -p "$MPLCONFIGDIR"   # matplotlib writes here (evaluate step)
 
 DATASETS=(camlds camlds casino casino)
-# vllm ids (only used if BACKEND=vllm)
 MODELS=(fdtn-ai/Foundation-Sec-8B-Instruct NousResearch/Meta-Llama-3.1-8B-Instruct \
         fdtn-ai/Foundation-Sec-8B-Instruct NousResearch/Meta-Llama-3.1-8B-Instruct)
-# Ollama tags, parallel to MODELS -- must match what you `ollama pull`ed.
+# Ollama tags, parallel to MODELS -- only used if BACKEND=ollama; adjust to your pulled tags.
 OLLAMA_MODELS=(hf.co/bartowski/Foundation-Sec-8B-Instruct-GGUF:Q4_K_M llama3.1:8b \
                hf.co/bartowski/Foundation-Sec-8B-Instruct-GGUF:Q4_K_M llama3.1:8b)
 
 DATASET=${DATASETS[$SLURM_ARRAY_TASK_ID]}
-VLLM_MODEL=${MODELS[$SLURM_ARRAY_TASK_ID]}
 if [ "$BACKEND" == "ollama" ]; then
     MODEL=${OLLAMA_MODELS[$SLURM_ARRAY_TASK_ID]}
 else
@@ -65,7 +66,7 @@ MODEL_TAG=$(echo "$MODEL" | sed 's#.*/##' | tr 'A-Z' 'a-z' | sed -E 's#[^a-z0-9]
 
 mkdir -p logs "$OUT_DIR"
 
-# --- Ollama backend: user-space server on this node ---
+# --- Ollama backend only: user-space server on this node ---
 if [ "$BACKEND" == "ollama" ]; then
     export OLLAMA_MODELS="$LAB/ollama-models"
     export PATH="$LAB/ollama-bin/bin:$PATH"
@@ -78,7 +79,7 @@ fi
 echo "============================================"
 echo "Task       : $SLURM_ARRAY_TASK_ID  ($DATASET x $MODEL)"
 echo "Data dir   : $DATA_DIR"
-echo "Backend    : $BACKEND"
+echo "Backend    : $BACKEND  (dtype=$DTYPE, cpu_offload_gb=$CPU_OFFLOAD_GB)"
 echo "Out dir    : $OUT_DIR"
 echo "Start      : $(date)"
 echo "============================================"
@@ -91,7 +92,8 @@ if [ $RC -ne 0 ]; then echo "dump failed"; fi
 if [ $RC -eq 0 ]; then
     $PYTHON "$SCRIPTS_DIR/llm_triage_arbitrate.py" \
         --dataset "$DATASET" --data-dir "$DATA_DIR" --out "$OUT_DIR" \
-        --model "$MODEL" --backend "$BACKEND"
+        --model "$MODEL" --backend "$BACKEND" \
+        --dtype "$DTYPE" --cpu-offload-gb "$CPU_OFFLOAD_GB"
     RC=$?
 fi
 
@@ -109,4 +111,3 @@ echo "Finished   : $(date)"
 echo "Exit code  : $RC"
 echo "============================================"
 exit $RC
-
