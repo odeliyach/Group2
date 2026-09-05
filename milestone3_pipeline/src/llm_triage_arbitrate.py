@@ -64,7 +64,8 @@ def assemble_row(contra_row, feat_cols, llm_result):
 
 
 def arbitrate_dataset(dataset_key, data_dir, out_dir, model_id=None, backend=None,
-                      max_cases=None, seed=42, client=None, cpu_offload_gb=None):
+                      max_cases=None, seed=42, client=None, cpu_offload_gb=None,
+                      dtype=None):
     from llm_triage_dump import find_contradictions, stratified_subsample
     from llm_triage_stats import compute_percentile_tables
     from llm_triage_context import build_context
@@ -109,7 +110,7 @@ def arbitrate_dataset(dataset_key, data_dir, out_dir, model_id=None, backend=Non
               flush=True)
 
     client = client or LLMClient(model_id=model_id, backend=backend,
-                                 cpu_offload_gb=cpu_offload_gb)
+                                 cpu_offload_gb=cpu_offload_gb, dtype=dtype)
     error_logged = False
     for i, (_, r) in enumerate(contra.iterrows()):
         if int(r["row_id"]) in done_ids:
@@ -151,10 +152,13 @@ def main():
     ap.add_argument("--cpu-offload-gb", type=float, default=LLM_TRIAGE["vllm_cpu_offload_gb"],
                     help="vLLM only: GB of weights to stream from host RAM so a bf16 "
                          "8B model fits a smaller GPU (e.g. 8 on a 12 GB titan)")
+    ap.add_argument("--dtype", default=LLM_TRIAGE["vllm_dtype"],
+                    help="vLLM only: 'bfloat16' (needs compute capability >= 8.0) or "
+                         "'float16' (pre-Volta GPUs, e.g. a Titan Xp)")
     args = ap.parse_args()
     arbitrate_dataset(args.dataset, args.data_dir, args.out, model_id=args.model,
                       backend=args.backend, max_cases=args.max_cases, seed=args.seed,
-                      cpu_offload_gb=args.cpu_offload_gb)
+                      cpu_offload_gb=args.cpu_offload_gb, dtype=args.dtype)
 
 
 if __name__ == "__main__":

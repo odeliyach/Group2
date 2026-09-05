@@ -1,4 +1,5 @@
 import json
+import pytest
 import llm_triage_client as LC
 
 
@@ -25,6 +26,37 @@ def test_cpu_offload_gb_defaults_to_config_and_is_overridable():
     import config
     assert LC.LLMClient(backend="ollama").cpu_offload_gb == config.LLM_TRIAGE["vllm_cpu_offload_gb"]
     assert LC.LLMClient(backend="ollama", cpu_offload_gb=8).cpu_offload_gb == 8
+
+
+def test_dtype_defaults_to_config_and_is_overridable():
+    import config
+    assert LC.LLMClient(backend="ollama").dtype == config.LLM_TRIAGE["vllm_dtype"]
+    assert LC.LLMClient(backend="ollama", dtype="float16").dtype == "float16"
+
+
+class FailingVLLMClient(LC.LLMClient):
+    """Simulates a GPU vLLM can never initialize on (e.g. wrong dtype for the
+    card's compute capability) -- engine construction fails every attempt."""
+    def __init__(self):
+        super().__init__(model_id="test", backend="vllm")
+        self.build_calls = 0
+
+    def _build_vllm_engine(self):
+        self.build_calls += 1
+        raise RuntimeError("Bfloat16 is only supported on GPUs with compute capability >= 8.0")
+
+
+def test_vllm_engine_failure_is_cached_not_retried_per_row():
+    c = FailingVLLMClient()
+    with pytest.raises(RuntimeError):
+        c.arbitrate("ctx for row 1")
+    with pytest.raises(RuntimeError):
+        c.arbitrate("ctx for row 2")
+    with pytest.raises(RuntimeError):
+        c.arbitrate("ctx for row 3")
+    # Real construction must be attempted exactly once, not once per row --
+    # this is what turned a doomed config into 400 x ~35s retries in practice.
+    assert c.build_calls == 1
 
 
 def test_valid_first_try_is_ok():

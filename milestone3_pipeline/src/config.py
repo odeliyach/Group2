@@ -218,4 +218,7 @@ LLM_TRIAGE = {
     # GB of model weights vLLM may stream from host RAM instead of VRAM, so a
     # bf16 8B model (~16 GB) fits a smaller GPU (e.g. a 12 GB titan). 0 = off.
     "vllm_cpu_offload_gb": 0,
+    # Pre-Volta GPUs (compute capability < 8.0, e.g. Titan Xp = 6.1) cannot run
+    # bfloat16 at all -- vLLM raises at engine init. Use "float16" on those.
+    "vllm_dtype": "bfloat16",
 }

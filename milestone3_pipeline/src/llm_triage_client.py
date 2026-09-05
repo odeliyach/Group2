@@ -48,7 +48,7 @@ def _try_parse(text):
 
 class LLMClient:
     def __init__(self, model_id=None, backend=None, max_new_tokens=None,
-                 temperature=None, seed=None, cpu_offload_gb=None):
+                 temperature=None, seed=None, cpu_offload_gb=None, dtype=None):
         c = LLM_TRIAGE
         self.model_id = model_id or c["model_id"]
         self.backend = backend or c["backend"]
@@ -60,8 +60,12 @@ class LLMClient:
         # that (e.g. a 12 GB titan), at some latency cost. 0 = disabled.
         self.cpu_offload_gb = (c.get("vllm_cpu_offload_gb", 0) if cpu_offload_gb is None
                                else cpu_offload_gb)
+        # Pre-Volta GPUs (compute capability < 8.0 -- e.g. a Titan Xp is 6.1)
+        # can't run bfloat16 at all; vLLM raises immediately at engine init.
+        self.dtype = c.get("vllm_dtype", "bfloat16") if dtype is None else dtype
         self._engine = None
         self._sp = None
+        self._engine_error = None  # cached engine-init failure: fail fast, don't retry per row
 
     # -- backend dispatch -------------------------------------------------
     def _generate(self, prompt):
@@ -87,32 +91,45 @@ class LLMClient:
 
     def _generate_vllm(self, prompt):
         if self._engine is None:
-            from vllm import LLM, SamplingParams
-            engine_kw = dict(model=self.model_id, dtype="bfloat16",
-                             max_model_len=4096, gpu_memory_utilization=0.90)
-            if self.cpu_offload_gb:
-                engine_kw["cpu_offload_gb"] = self.cpu_offload_gb
-                try:
-                    self._engine = LLM(**engine_kw)
-                except TypeError:
-                    # Older vLLM without cpu_offload_gb -- retry without it rather
-                    # than silently running out of VRAM with no explanation.
-                    print("[llm_triage_client] this vLLM build has no cpu_offload_gb; "
-                          "retrying without offload (may OOM on a small GPU)", flush=True)
-                    del engine_kw["cpu_offload_gb"]
-                    self._engine = LLM(**engine_kw)
-            else:
-                self._engine = LLM(**engine_kw)
-            kw = dict(temperature=self.temperature, seed=self.seed,
-                      max_tokens=self.max_new_tokens)
+            # Engine construction is expensive (tens of seconds) and, if the
+            # config is wrong for this GPU (wrong dtype, insufficient VRAM,
+            # ...), fails deterministically every time. Cache the failure so
+            # a whole batch doesn't re-attempt and re-fail it once per row.
+            if self._engine_error is not None:
+                raise self._engine_error
             try:
-                # Newer vLLM: constrain decoding to the schema; older builds lack this.
-                from vllm.sampling_params import GuidedDecodingParams
-                self._sp = SamplingParams(
-                    guided_decoding=GuidedDecodingParams(json=ARBITRATION_SCHEMA_V1), **kw)
-            except (ImportError, TypeError):
-                self._sp = SamplingParams(**kw)
+                self._build_vllm_engine()
+            except Exception as e:
+                self._engine_error = e
+                raise
         return self._engine.generate([prompt], self._sp)[0].outputs[0].text
+
+    def _build_vllm_engine(self):
+        from vllm import LLM, SamplingParams
+        engine_kw = dict(model=self.model_id, dtype=self.dtype,
+                         max_model_len=4096, gpu_memory_utilization=0.90)
+        if self.cpu_offload_gb:
+            engine_kw["cpu_offload_gb"] = self.cpu_offload_gb
+            try:
+                self._engine = LLM(**engine_kw)
+            except TypeError:
+                # Older vLLM without cpu_offload_gb -- retry without it rather
+                # than silently running out of VRAM with no explanation.
+                print("[llm_triage_client] this vLLM build has no cpu_offload_gb; "
+                      "retrying without offload (may OOM on a small GPU)", flush=True)
+                del engine_kw["cpu_offload_gb"]
+                self._engine = LLM(**engine_kw)
+        else:
+            self._engine = LLM(**engine_kw)
+        kw = dict(temperature=self.temperature, seed=self.seed,
+                  max_tokens=self.max_new_tokens)
+        try:
+            # Newer vLLM: constrain decoding to the schema; older builds lack this.
+            from vllm.sampling_params import GuidedDecodingParams
+            self._sp = SamplingParams(
+                guided_decoding=GuidedDecodingParams(json=ARBITRATION_SCHEMA_V1), **kw)
+        except (ImportError, TypeError):
+            self._sp = SamplingParams(**kw)
 
     # -- public API -----------------------------------------------------
     def arbitrate(self, context_str):
