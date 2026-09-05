@@ -37,7 +37,7 @@ LAB="/vol/joberant_nobck/data/NLP_368307701_2526a/alinl"
 PYTHON="$LAB/envs/llmtriage/bin/python -u"
 SCRIPTS_DIR="milestone3_pipeline/src"
 OUT_ROOT="milestone3_pipeline/results/current/llm_triage"
-BACKEND="ollama"
+BACKEND="vllm"
 
 export TMPDIR="$LAB/tmp"; mkdir -p "$TMPDIR"
 export HF_HOME="$LAB/hf_cache"          # unused by the ollama path; kept for a vllm switch-back
