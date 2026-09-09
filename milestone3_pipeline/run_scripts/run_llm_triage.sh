@@ -5,8 +5,9 @@
 #SBATCH --array=0-3
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
+#SBATCH --exclude=s-002
 #SBATCH --mem=32G
-#SBATCH --gres=gpu:titan:1
+#SBATCH --gres=gpu:1
 #SBATCH --time=04:00:00
 #SBATCH --partition=studentkillable
 #SBATCH --open-mode=truncate
@@ -31,11 +32,19 @@
 # See docs/milestone3/llm_triage_runbook.md for setup, config and troubleshooting.
 # Submit from the repo ROOT:  sbatch milestone3_pipeline/run_scripts/run_llm_triage.sh
 
-LAB="/vol/joberant_nobck/data/NLP_368307701_2526a/alinl"
+LAB="/vol/joberant_nobck/data/NLP_368307701_2526a/liorpernik/workshop/Group2"
 PYTHON="$LAB/envs/llmtriage/bin/python -u"
 SCRIPTS_DIR="milestone3_pipeline/src"
 OUT_ROOT="milestone3_pipeline/results/current/llm_triage"
 BACKEND="vllm"
++#BACKEND="ollama"
+
+export HOME="/vol/joberant_nobck/data/NLP_368307701_2526a/alinl"
+export MPLCONFIGDIR="/vol/joberant_nobck/data/NLP_368307701_2526a/alinl/tmp/matplotlib_cache"
+#export VLLM_CACHE_DIR="/vol/joberant_nobck/data/NLP_368307701_2526a/alinl/tmp/vllm_cache"
+export XDG_CACHE_HOME="/vol/joberant_nobck/data/NLP_368307701_2526a/alinl/tmp/cache"
+
+
 DTYPE="float16"          # "bfloat16" only on compute capability >= 8.0 (Ampere+)
 CPU_OFFLOAD_GB="8"       # host-RAM weight streaming so fp16 8B fits a 12 GB titan; 0 = off
 

@@ -220,5 +220,5 @@ LLM_TRIAGE = {
     "vllm_cpu_offload_gb": 0,
     # Pre-Volta GPUs (compute capability < 8.0, e.g. Titan Xp = 6.1) cannot run
     # bfloat16 at all -- vLLM raises at engine init. Use "float16" on those.
-    "vllm_dtype": "bfloat16",
+    "vllm_dtype": "float16",
 }
