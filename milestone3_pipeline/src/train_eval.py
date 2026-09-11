@@ -33,7 +33,8 @@ from sklearn.metrics import (precision_score, recall_score, f1_score,
                               roc_auc_score, confusion_matrix)
 
 from preprocessing import impute, fit_scaler_on_train, fold_class_weights, xgb_scale_pos_weight
-from models import build_rf, build_xgb, build_cnn, cnn_fit_kwargs, build_iforest
+from models import (build_rf, build_xgb, build_cnn, cnn_fit_kwargs,
+                     build_mlp, mlp_fit_kwargs, build_iforest)
 from config import CV_CONFIG, MAX_FPR
 
 
@@ -159,6 +160,31 @@ def _fit_predict_cnn(X_tr, y_tr, groups_tr, X_te, hp_overrides, max_fpr):
     return (proba >= threshold).astype(int), proba
 
 
+def _fit_predict_mlp(X_tr, y_tr, groups_tr, X_te, hp_overrides, max_fpr):
+    # Mirrors _fit_predict_cnn exactly (same fold-safe scaler, same inner
+    # group-aware validation split for threshold calibration and early
+    # stopping) -- the ONLY difference from the CNN fitter is no [..., None]
+    # channel-dimension reshape, since build_mlp takes a plain 2D input.
+    scaler = fit_scaler_on_train(X_tr)
+    X_tr_s = scaler.transform(X_tr)
+    X_te_s = scaler.transform(X_te)
+
+    gss = GroupShuffleSplit(n_splits=1, train_size=0.85, random_state=0)
+    fit_idx, val_idx = next(gss.split(X_tr_s, y_tr, groups_tr))
+    cw = fold_class_weights(y_tr[fit_idx])
+
+    clf = build_mlp(n_features=X_tr.shape[1], overrides=hp_overrides)
+    fit_kwargs = mlp_fit_kwargs(hp_overrides)
+    clf.fit(X_tr_s[fit_idx], y_tr[fit_idx], class_weight=cw,
+            validation_data=(X_tr_s[val_idx], y_tr[val_idx]), **fit_kwargs)
+
+    val_proba = clf.predict(X_tr_s[val_idx], verbose=0).ravel()
+    threshold = _best_f1_threshold(y_tr[val_idx], val_proba, max_fpr=max_fpr)
+
+    proba = clf.predict(X_te_s, verbose=0).ravel()
+    return (proba >= threshold).astype(int), proba
+
+
 def _fit_predict_iforest(X_tr, y_tr, groups_tr, X_te, hp_overrides, max_fpr):
     # Unsupervised fit -- y_tr never reaches .fit(). y_tr IS used below,
     # AFTER fitting, purely to calibrate the anomaly-score threshold (see
@@ -180,6 +206,7 @@ _FITTERS = {
     "rf": _fit_predict_rf,
     "xgb": _fit_predict_xgb,
     "cnn": _fit_predict_cnn,
+    "mlp": _fit_predict_mlp,
     "iforest": _fit_predict_iforest,
 }
 

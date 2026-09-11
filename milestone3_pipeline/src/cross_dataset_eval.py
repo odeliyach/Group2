@@ -280,7 +280,7 @@ def run_cross_dataset(model_key: str, data_dir: str, out_dir: Path, hp_overrides
 
 def main():
     p = argparse.ArgumentParser(description="Step 8 cross-dataset generalization: train on one, test on other")
-    p.add_argument("--model", choices=["rf", "xgb", "cnn", "iforest", "all"], default="all")
+    p.add_argument("--model", choices=["rf", "xgb", "cnn", "mlp", "iforest", "all"], default="all")
     p.add_argument("--data-dir", default=".")
     p.add_argument("--out", default="outputs/cross_dataset")
     p.add_argument("--calibration-frac", type=float, default=0.0,

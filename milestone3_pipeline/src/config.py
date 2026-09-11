@@ -88,6 +88,29 @@ CNN_PARAMS = {
     "random_state": 42,
 }
 
+MLP_PARAMS = {
+    # Added per M2 reviewer point 2: "if process execution traces in
+    # CasinoLimit lack sequential depth (98.2% single-event processes),
+    # pivot from the 1D-CNN to a deep MLP with Batch Normalization and
+    # Dropout." Tested head-to-head against the production CNN under the
+    # identical protocol (compare_cnn_vs_mlp.py, 15-repeat, Casino):
+    #   CNN: F1=0.635+/-0.264  AUROC=0.793+/-0.255
+    #   MLP: F1=0.862+/-0.089  AUROC=0.993+/-0.019
+    # MLP wins on both mean AND stability by a wide margin -- adopted as
+    # the Deep Learning paradigm representative for CasinoLimit. CAM-LDS
+    # keeps the CNN (it has real sequence depth, 10.87 events/process
+    # avg, unlike Casino -- see M2 Ch6.1's original justification, which
+    # still applies there and was not re-tested).
+    "dense_units": [256, 128, 64, 32],
+    "dropout": 0.3,
+    "learning_rate": 1e-3,
+    "batch_size": 512,
+    "epochs": 50,
+    "early_stopping_patience": 5,
+    "class_weight_strategy": "balanced",
+    "random_state": 42,
+}
+
 IFOREST_PARAMS = {
     "n_estimators": 200,
     "max_samples": 256,

@@ -93,7 +93,7 @@ def _plot(df, dataset_key, model_key, out_dir):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--dataset", choices=["camlds", "casino"], required=True)
-    p.add_argument("--model", choices=["rf", "xgb", "cnn", "iforest"], required=True)
+    p.add_argument("--model", choices=["rf", "xgb", "cnn", "mlp", "iforest"], required=True)
     p.add_argument("--caps", default=",".join(str(c) for c in DEFAULT_CAPS),
                    help="Comma-separated FPR caps to test, e.g. 0.01,0.05,0.10 (use 1.0 for uncapped)")
     p.add_argument("--repeats", type=int, default=5,

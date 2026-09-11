@@ -27,7 +27,7 @@ try:
 except ImportError:
     _HAS_TF = False
 
-from config import RF_PARAMS, XGB_PARAMS, CNN_PARAMS, IFOREST_PARAMS
+from config import RF_PARAMS, XGB_PARAMS, CNN_PARAMS, MLP_PARAMS, IFOREST_PARAMS
 
 
 def build_rf(overrides: dict = None) -> RandomForestClassifier:
@@ -97,7 +97,48 @@ def cnn_fit_kwargs(overrides: dict = None) -> dict:
     """Fit-time kwargs shared across CV folds (epochs/batch_size/early
     stopping), kept separate from build_cnn's architecture kwargs."""
     p = {**CNN_PARAMS, **(overrides or {})}
-    es = callbacks.EarlyStopping(monitor="val_auc", mode="max",
+    es = callbacks.EarlyStopping(monitor="auc", mode="max",
+                                  patience=p["early_stopping_patience"],
+                                  restore_best_weights=True)
+    return {"epochs": p["epochs"], "batch_size": p["batch_size"], "callbacks": [es], "verbose": 0}
+
+
+def build_mlp(n_features: int, overrides: dict = None):
+    """Deep MLP with BatchNorm + Dropout after every hidden layer --
+    the M2 reviewer's requested alternative to the 1D-CNN for datasets
+    (CasinoLimit specifically) lacking real sequential depth. Unlike the
+    CNN, this makes no assumption that adjacent input columns are
+    spatially related -- every feature is treated symmetrically, which
+    was the reviewer's actual objection to the CNN's convolution over an
+    arbitrary tabular feature order. See config.MLP_PARAMS for the
+    head-to-head test results that led to adopting this for CasinoLimit."""
+    if not _HAS_TF:
+        raise ImportError("tensorflow not installed. pip install tensorflow --break-system-packages")
+    p = {**MLP_PARAMS, **(overrides or {})}
+    tf.random.set_seed(p["random_state"])
+
+    inputs = layers.Input(shape=(n_features,))
+    x = inputs
+    for units in p["dense_units"]:
+        x = layers.Dense(units, activation="relu")(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Dropout(p["dropout"])(x)
+    outputs = layers.Dense(1, activation="sigmoid")(x)
+
+    model = km.Model(inputs, outputs)
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=p["learning_rate"]),
+        loss="binary_crossentropy",
+        metrics=[tf.keras.metrics.AUC(name="auc"), tf.keras.metrics.Precision(name="precision"),
+                 tf.keras.metrics.Recall(name="recall")],
+    )
+    return model
+
+
+def mlp_fit_kwargs(overrides: dict = None) -> dict:
+    """Fit-time kwargs shared across CV folds, mirrors cnn_fit_kwargs."""
+    p = {**MLP_PARAMS, **(overrides or {})}
+    es = callbacks.EarlyStopping(monitor="auc", mode="max",
                                   patience=p["early_stopping_patience"],
                                   restore_best_weights=True)
     return {"epochs": p["epochs"], "batch_size": p["batch_size"], "callbacks": [es], "verbose": 0}
@@ -120,5 +161,6 @@ MODEL_REGISTRY = {
     "rf": build_rf,
     "xgb": build_xgb,
     "cnn": build_cnn,
+    "mlp": build_mlp,
     "iforest": build_iforest,
 }
