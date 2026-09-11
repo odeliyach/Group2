@@ -19,4 +19,4 @@ Thumbs.db
 
 /data/raw/
 /combined/
-/logs/
+/logs/.ssh/
