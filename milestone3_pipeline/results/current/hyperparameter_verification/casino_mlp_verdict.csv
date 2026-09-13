@@ -1,0 +1,2 @@
+model,dataset,production_f1_mean,production_f1_std,candidate_f1_mean,candidate_f1_std,delta_f1,signal_to_noise,verdict
+mlp,casino,0.8798957639228592,0.08000347723059249,0.7973458177399889,0.15752079547364717,-0.08254994618287026,0.4672470327297461,"NO REAL DIFFERENCE -- delta is within noise, keep production config as-is, cite this verification in the report instead of leaving it unresolved"

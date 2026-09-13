@@ -1,0 +1,2 @@
+model,dataset,production_f1_mean,production_f1_std,candidate_f1_mean,candidate_f1_std,delta_f1,signal_to_noise,verdict
+mlp,camlds,0.8338960451680032,0.03360220428762116,0.8225357802079855,0.040867361413256684,-0.01136026496001774,0.21471761116255783,"NO REAL DIFFERENCE -- delta is within noise, keep production config as-is, cite this verification in the report instead of leaving it unresolved"
