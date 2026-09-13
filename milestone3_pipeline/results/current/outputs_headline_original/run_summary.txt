@@ -1,1 +1,1 @@
-CAM-LDS / xgb: F1=0.8502+/-0.0343  AUROC=0.9351+/-0.0046  Precision=0.9170  Recall=0.8007  FPR=0.0969
+CAM-LDS / mlp: F1=0.8395+/-0.0333  AUROC=0.9308+/-0.0097  Precision=0.8802  Recall=0.8124  FPR=0.1493
