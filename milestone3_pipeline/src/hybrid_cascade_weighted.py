@@ -53,7 +53,7 @@ from ingestion import ingest
 from feature_selection import select_features
 from preprocessing import (vector_group_key, log1p_continuous, fit_scaler_on_train,
                             xgb_scale_pos_weight, fold_class_weights)
-from models import build_xgb, build_cnn, build_rf, cnn_fit_kwargs
+from models import build_xgb, build_cnn, build_mlp, build_rf, cnn_fit_kwargs, mlp_fit_kwargs
 from train_eval import _best_f1_threshold, _fpr
 
 BINARY_FEATURES = {
@@ -99,12 +99,20 @@ def cascade_predict(X_tr, y_tr, X_te, feat_cols, max_fpr, stage2,
             cw = fold_class_weights(y_tr)
             model.fit(X_tr_scaled, y_tr, class_weight=cw, **cnn_fit_kwargs())
             stage2_proba = model.predict(X_te_scaled[uncertain], verbose=0).ravel()
+        elif stage2 == 'mlp':
+            scaler = fit_scaler_on_train(X_tr_log)
+            X_tr_scaled = scaler.transform(X_tr_log)
+            X_te_scaled = scaler.transform(X_te_log)
+            model = build_mlp(n_features=X_tr_scaled.shape[1])
+            cw = fold_class_weights(y_tr)
+            model.fit(X_tr_scaled, y_tr, class_weight=cw, **mlp_fit_kwargs())
+            stage2_proba = model.predict(X_te_scaled[uncertain], verbose=0).ravel()
         elif stage2 == 'rf':
             model = build_rf()
             model.fit(X_tr, y_tr)
             stage2_proba = model.predict_proba(X_te[uncertain])[:, 1]
         else:
-            raise ValueError(f"Unknown --stage2 '{stage2}' (use 'cnn' or 'rf')")
+            raise ValueError(f"Unknown --stage2 '{stage2}' (use 'cnn', 'mlp', or 'rf')")
 
         final_proba[uncertain] = (1 - stage2_weight) * xgb_proba[uncertain] + stage2_weight * stage2_proba
 
@@ -169,7 +177,7 @@ if __name__ == "__main__":
         description="Hybrid cascade, confidence-weighted blend: XGBoost (stage 1) -> "
                      "stage-2 model, blend weight scales with distance from band center")
     p.add_argument("--dataset", choices=["camlds", "casino"], required=True)
-    p.add_argument("--stage2", choices=["cnn", "rf"], required=True)
+    p.add_argument("--stage2", choices=["cnn", "mlp", "rf"], required=True)
     p.add_argument("--data-dir", default=".")
     p.add_argument("--out", default=None,
                     help="Defaults to results/current/hybrid_cascade_weighted_<stage2>/ if omitted")

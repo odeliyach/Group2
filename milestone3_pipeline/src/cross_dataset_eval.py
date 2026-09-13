@@ -40,7 +40,7 @@ from sklearn.metrics import (precision_score, recall_score, f1_score,
 from ingestion import ingest
 from preprocessing import (vector_group_key, impute, fit_scaler_on_train,
                             fold_class_weights, xgb_scale_pos_weight, log1p_continuous)
-from models import build_rf, build_xgb, build_cnn, cnn_fit_kwargs, build_iforest
+from models import build_rf, build_xgb, build_cnn, build_mlp, cnn_fit_kwargs, mlp_fit_kwargs, build_iforest
 from train_eval import _best_f1_threshold
 from config import MAX_FPR, LOG1P_CONTINUOUS_FEATURES, BINARY_FEATURES
 
@@ -147,6 +147,24 @@ def _fit_on_full_train(model_key, X_train, y_train, groups_train, hp_overrides=N
 
         def predict_fn(X, scaler=scaler, clf=clf):
             X_s = scaler.transform(impute(X))[..., None]
+            return clf.predict(X_s, verbose=0).ravel()
+        return predict_fn, threshold
+
+    if model_key == "mlp":
+        scaler = fit_scaler_on_train(X_train)
+        X_train_s = scaler.transform(X_train)
+        cw = fold_class_weights(y_train[fit_idx])
+
+        clf = build_mlp(n_features=X_train.shape[1], overrides=hp_overrides)
+        fit_kwargs = mlp_fit_kwargs(hp_overrides)
+        clf.fit(X_train_s[fit_idx], y_train[fit_idx], class_weight=cw,
+                validation_data=(X_train_s[val_idx], y_train[val_idx]), **fit_kwargs)
+
+        val_proba = clf.predict(X_train_s[val_idx], verbose=0).ravel()
+        threshold = _best_f1_threshold(y_train[val_idx], val_proba, max_fpr=MAX_FPR)
+
+        def predict_fn(X, scaler=scaler, clf=clf):
+            X_s = scaler.transform(impute(X))
             return clf.predict(X_s, verbose=0).ravel()
         return predict_fn, threshold
 

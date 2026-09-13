@@ -51,7 +51,7 @@ def run_config(model_key, dataset_key, data_dir, hp_overrides, repeats=15, n_spl
 def main():
     ap = argparse.ArgumentParser(description="Verify a candidate hyperparameter config "
                                               "against production under the headline protocol")
-    ap.add_argument("--model", choices=["rf", "xgb", "cnn", "iforest"], required=True)
+    ap.add_argument("--model", choices=["rf", "xgb", "cnn", "mlp", "iforest"], required=True)
     ap.add_argument("--dataset", choices=["camlds", "casino"], required=True)
     ap.add_argument("--data-dir", default=".")
     ap.add_argument("--candidate-params", required=True,
