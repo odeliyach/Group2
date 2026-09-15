@@ -1,0 +1,176 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789371956.415499 2309460 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[error_analysis] dataset=casino models=['rf', 'xgb', 'mlp', 'iforest']
+[ingestion] Loaded CasinoLimit: 91,692 rows from ../data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+[error_analysis] rf fold 1/5 done
+[error_analysis] rf fold 2/5 done
+[error_analysis] rf fold 3/5 done
+[error_analysis] rf fold 4/5 done
+[error_analysis] rf fold 5/5 done
+[error_analysis] xgb fold 1/5 done
+[error_analysis] xgb fold 2/5 done
+[error_analysis] xgb fold 3/5 done
+[error_analysis] xgb fold 4/5 done
+[error_analysis] xgb fold 5/5 done
+[error_analysis] mlp fold 1/5 done
+[error_analysis] mlp fold 2/5 done
+[error_analysis] mlp fold 3/5 done
+[error_analysis] mlp fold 4/5 done
+[error_analysis] mlp fold 5/5 done
+[error_analysis] iforest fold 1/5 done
+[error_analysis] iforest fold 2/5 done
+[error_analysis] iforest fold 3/5 done
+[error_analysis] iforest fold 4/5 done
+[error_analysis] iforest fold 5/5 done
+[error_analysis] Saved full row-level predictions: results/current/error_analysis_results/casino_mlp/casino_error_rows.csv
+
+=================================================================
+rf
+=================================================================
+FN rate by technique (worst first):
+errtype_rf   FN    TP  total   fn_rate
+technique                             
+T1222        79   715    794  0.099496
+T1595       116  1880   1996  0.058116
+T1059         0  5001   5001  0.000000
+T1548         0  7902   7902  0.000000
+
+Benign FP rate: 211/75999 (0.28%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+               feature   FN_mean     TP_mean  FN_over_TP_ratio
+9     failed_call_rate  0.674359    0.046802         14.408845
+10   failed_call_count  0.687179    0.052716         13.035383
+7   max_uid_euid_delta  0.000000  230.314557          0.000000
+11       priv_op_count  0.000000    0.024068          0.000000
+12          exec_count  0.000000    0.959350          0.000000
+
+Top 5 features most different between false-positive and true-negative benign rows:
+               feature   FP_mean   TN_mean  cohens_d
+12          exec_count  0.890995  0.000000  4.033652
+13   file_access_count  0.000000  1.023869 -3.759573
+4          uid_is_root  0.526066  0.000686  1.482465
+6            euid_root  0.526066  0.000686  1.482465
+8   auid_euid_mismatch  0.526066  0.998958 -1.333414
+
+=================================================================
+xgb
+=================================================================
+FN rate by technique (worst first):
+errtype_xgb   FN    TP  total   fn_rate
+technique                              
+T1222         84   710    794  0.105793
+T1595        116  1880   1996  0.058116
+T1548         62  7840   7902  0.007846
+T1059          0  5001   5001  0.000000
+
+Benign FP rate: 206/75999 (0.27%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+                  feature   FN_mean     TP_mean  FN_over_TP_ratio
+10      failed_call_count  0.977099    0.045039         21.694415
+9        failed_call_rate  0.738550    0.042987         17.180742
+7      max_uid_euid_delta  0.000000  231.314562          0.000000
+15     shell_from_service  0.000000    0.210485          0.000000
+16  sensitive_path_access  0.000000    0.000130          0.000000
+
+Top 5 features most different between false-positive and true-negative benign rows:
+               feature   FP_mean   TN_mean  cohens_d
+12          exec_count  0.912621  0.000000  4.559330
+13   file_access_count  0.000000  1.023802 -3.758573
+4          uid_is_root  0.519417  0.000739  1.462434
+6            euid_root  0.519417  0.000739  1.462434
+8   auid_euid_mismatch  0.519417  0.998944 -1.351196
+
+=================================================================
+mlp
+=================================================================
+FN rate by technique (worst first):
+errtype_mlp    FN    TP  total   fn_rate
+technique                               
+T1222         234   560    794  0.294710
+T1059        1211  3790   5001  0.242152
+T1548         691  7211   7902  0.087446
+T1595          75  1921   1996  0.037575
+
+Benign FP rate: 213/75999 (0.28%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+               feature   FN_mean   TP_mean  FN_over_TP_ratio
+15  shell_from_service  0.000000  0.240914          0.000000
+11       priv_op_count  0.001357  0.027444          0.049441
+4          uid_is_root  0.032112  0.477822          0.067205
+9     failed_call_rate  0.006332  0.062515          0.101287
+10   failed_call_count  0.011759  0.068610          0.171395
+
+Top 5 features most different between false-positive and true-negative benign rows:
+               feature   FP_mean   TN_mean  cohens_d
+12          exec_count  0.882629  0.000000  3.869030
+13   file_access_count  0.000000  1.023896 -3.759973
+8   auid_euid_mismatch  0.469484  0.999129 -1.494738
+4          uid_is_root  0.469484  0.000831  1.322710
+6            euid_root  0.469484  0.000831  1.322710
+
+=================================================================
+iforest
+=================================================================
+FN rate by technique (worst first):
+errtype_iforest    FN    TP  total   fn_rate
+technique                                   
+T1595            1934    62   1996  0.968938
+T1548            7129   773   7902  0.902177
+T1222             125   669    794  0.157431
+T1059             579  4422   5001  0.115777
+
+Benign FP rate: 1322/75999 (1.74%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+                  feature     FN_mean     TP_mean  FN_over_TP_ratio
+13      file_access_count    0.006246    0.000506         12.336985
+7      max_uid_euid_delta  293.818163  118.071718          2.488472
+16  sensitive_path_access    0.000000    0.000337          0.000000
+15     shell_from_service    0.000410    0.547418          0.000748
+6               euid_root    0.779564    0.414276          1.881750
+
+Top 5 features most different between false-positive and true-negative benign rows:
+              feature    FP_mean   TN_mean  cohens_d
+13  file_access_count   2.182300  1.000469  0.651266
+1   events_per_second   1.678808  0.998315  0.532341
+0    lifetime_seconds  40.028062  1.361052  0.475808
+4         uid_is_root   0.045386  0.001379  0.294241
+6           euid_root   0.045386  0.001379  0.294241
+
+=================================================================
+Generating charts
+=================================================================
+[error_analysis] Saved: results/current/error_analysis_results/casino_mlp/casino_technique_fn_rates.png
+[error_analysis] Saved: results/current/error_analysis_results/casino_mlp/casino_fp_feature_comparison.png
+
+=================================================================
+Pairwise model comparisons
+=================================================================
+
+rf wrong & xgb right: 7 rows
+rf right & xgb wrong: 69 rows
+
+rf wrong & mlp right: 142 rows
+rf right & mlp wrong: 2160 rows
+
+rf wrong & iforest right: 327 rows
+rf right & iforest wrong: 11010 rows
+
+xgb wrong & mlp right: 203 rows
+xgb right & mlp wrong: 2159 rows
+
+xgb wrong & iforest right: 386 rows
+xgb right & iforest wrong: 11007 rows
+
+mlp wrong & iforest right: 2336 rows
+mlp right & iforest wrong: 11001 rows
+
+[error_analysis] Done. All outputs in results/current/error_analysis_results/casino_mlp/
