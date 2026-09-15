@@ -23,7 +23,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 
-from config import RF_PARAMS, XGB_PARAMS, CNN_PARAMS, IFOREST_PARAMS, MAX_FPR
+from config import RF_PARAMS, XGB_PARAMS, CNN_PARAMS, MLP_PARAMS, IFOREST_PARAMS, MAX_FPR
 from ingestion import ingest
 from feature_selection import select_features
 from preprocessing import vector_group_key, log1p_continuous, impute
@@ -76,7 +76,7 @@ def main():
     joblib.dump(iforest, out_dir / f"{args.dataset}_iforest.pkl")
     print(f"  saved {out_dir}/{args.dataset}_iforest.pkl")
 
-    # -- CNN ----------------------------------------------------------------
+    # -- CNN (retained specifically for the cascade's Stage 2 role) --------
     try:
         from models import build_cnn
         cnn = build_cnn(n_features=X.shape[1])  # overrides=None -> uses production CNN_PARAMS
@@ -91,6 +91,21 @@ def main():
         print(f"  RF/XGBoost/IForest artifacts above are still saved and valid --")
         print(f"  this only affects the CNN artifact.")
 
+    # -- MLP (headline Deep Learning paradigm representative, both datasets) --
+    try:
+        from models import build_mlp
+        mlp = build_mlp(n_features=X.shape[1])  # overrides=None -> uses production MLP_PARAMS
+        mlp.fit(X, y, epochs=MLP_PARAMS["epochs"], batch_size=MLP_PARAMS["batch_size"],
+                class_weight=({0: 1.0, 1: scale_pos_weight}
+                              if MLP_PARAMS.get("class_weight_strategy") == "balanced" else None),
+                verbose=0)
+        mlp.save(out_dir / f"{args.dataset}_mlp.keras")
+        print(f"  saved {out_dir}/{args.dataset}_mlp.keras")
+    except Exception as e:
+        print(f"  SKIPPED MLP -- {type(e).__name__}: {e}")
+        print(f"  RF/XGBoost/IForest/CNN artifacts above are still saved and valid --")
+        print(f"  this only affects the MLP artifact.")
+
     # -- manifest -----------------------------------------------------------
     manifest = {
         "dataset": args.dataset,
@@ -101,9 +116,13 @@ def main():
         "xgb_params": xgb_params,
         "iforest_params": IFOREST_PARAMS,
         "cnn_params": CNN_PARAMS,
+        "mlp_params": MLP_PARAMS,
         "max_fpr_operating_point": MAX_FPR,
         "note": "Fit on the FULL dataset for archival/deployment -- NOT the same "
-                "object as any individual cross-validation fold's model.",
+                "object as any individual cross-validation fold's model. MLP is "
+                "the headline Deep Learning paradigm representative (both "
+                "datasets); CNN is retained specifically for the cascade's "
+                "Stage 2 role -- see report S2.1/S3.2 for the reasoning.",
     }
     (out_dir / f"{args.dataset}_manifest.json").write_text(json.dumps(manifest, indent=2))
     print(f"  saved {out_dir}/{args.dataset}_manifest.json (exact config used, for reproducibility)")

@@ -20,7 +20,7 @@ echo "Task $SLURM_ARRAY_TASK_ID: model=$MODEL"
 echo "Start: $(date)"
 
 $PYTHON src/cross_dataset_eval.py --model "$MODEL" --data-dir ../data/v3 --repeats 15 \
-    --calibration-frac 0.9 \
+    --calibration-frac 0.1 \
     --out results/current/outputs_camlds_v3/cross_dataset/
 
 echo "Finished: $(date)"
