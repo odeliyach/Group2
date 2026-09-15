@@ -1,0 +1,54 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789216472.824724 3220576 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+=== mlp / casino: production vs. candidate, 15-repeat protocol (matches headline methodology) ===
+Candidate overrides (delta from production): {'dropout': 0.3, 'learning_rate': 0.01}
+
+Running PRODUCTION config (hp_overrides=None -> current config.py values)...
+[ingestion] Loaded CasinoLimit: 91,692 rows from ../data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+[train_eval] mlp repeat 1/15: F1=0.9422 AUROC=0.9983 FPR=0.0029
+[train_eval] mlp repeat 2/15: F1=0.7835 AUROC=0.9981 FPR=0.0016
+[train_eval] mlp repeat 3/15: F1=0.9613 AUROC=0.9984 FPR=0.0035
+[train_eval] mlp repeat 4/15: F1=0.8304 AUROC=0.9988 FPR=0.0022
+[train_eval] mlp repeat 5/15: F1=0.8637 AUROC=0.9224 FPR=0.0019
+[train_eval] mlp repeat 6/15: F1=0.9656 AUROC=0.9986 FPR=0.0030
+[train_eval] mlp repeat 7/15: F1=0.7355 AUROC=0.9981 FPR=0.0012
+[train_eval] mlp repeat 8/15: F1=0.8681 AUROC=0.9896 FPR=0.0015
+[train_eval] mlp repeat 9/15: F1=0.8417 AUROC=0.9981 FPR=0.0017
+[train_eval] mlp repeat 10/15: F1=0.7609 AUROC=0.9979 FPR=0.0020
+[train_eval] mlp repeat 11/15: F1=0.9455 AUROC=0.9981 FPR=0.0034
+[train_eval] mlp repeat 12/15: F1=0.9817 AUROC=0.9982 FPR=0.0027
+[train_eval] mlp repeat 13/15: F1=0.9473 AUROC=0.9976 FPR=0.0031
+[train_eval] mlp repeat 14/15: F1=0.8418 AUROC=0.9989 FPR=0.0014
+[train_eval] mlp repeat 15/15: F1=0.9294 AUROC=0.9985 FPR=0.0027
+  F1=0.8799±0.0800  AUROC=0.9927±0.0196
+Running CANDIDATE config...
+[ingestion] Loaded CasinoLimit: 91,692 rows from ../data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+[train_eval] mlp repeat 1/15: F1=0.5621 AUROC=0.9985 FPR=0.0014
+[train_eval] mlp repeat 2/15: F1=0.6715 AUROC=0.9981 FPR=0.0002
+[train_eval] mlp repeat 3/15: F1=0.9638 AUROC=0.9988 FPR=0.0033
+[train_eval] mlp repeat 4/15: F1=0.8360 AUROC=0.9986 FPR=0.0022
+[train_eval] mlp repeat 5/15: F1=0.9151 AUROC=0.9991 FPR=0.0022
+[train_eval] mlp repeat 6/15: F1=0.9650 AUROC=0.9985 FPR=0.0031
+[train_eval] mlp repeat 7/15: F1=0.7006 AUROC=0.9974 FPR=0.0012
+[train_eval] mlp repeat 8/15: F1=0.9861 AUROC=0.9979 FPR=0.0031
+[train_eval] mlp repeat 9/15: F1=0.8067 AUROC=0.9981 FPR=0.0017
+[train_eval] mlp repeat 10/15: F1=0.7450 AUROC=0.9983 FPR=0.0013
+[train_eval] mlp repeat 11/15: F1=0.6358 AUROC=0.9983 FPR=0.0006
+[train_eval] mlp repeat 12/15: F1=0.9913 AUROC=0.9979 FPR=0.0034
+[train_eval] mlp repeat 13/15: F1=0.9345 AUROC=0.9975 FPR=0.0034
+[train_eval] mlp repeat 14/15: F1=0.5392 AUROC=0.9984 FPR=0.0016
+[train_eval] mlp repeat 15/15: F1=0.7075 AUROC=0.9985 FPR=0.0012
+  F1=0.7973±0.1575  AUROC=0.9983±0.0005
+
+Delta F1: -0.0825  (signal/noise ratio: 0.47)
+VERDICT: NO REAL DIFFERENCE -- delta is within noise, keep production config as-is, cite this verification in the report instead of leaving it unresolved
+
+Saved: results/current/hyperparameter_verification/casino_mlp_verdict.csv

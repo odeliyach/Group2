@@ -1,0 +1,52 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789216472.818205 3220575 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+=== mlp / camlds: production vs. candidate, 15-repeat protocol (matches headline methodology) ===
+Candidate overrides (delta from production): {'dropout': 0.5, 'learning_rate': 0.0001}
+
+Running PRODUCTION config (hp_overrides=None -> current config.py values)...
+[ingestion] Loaded CAM-LDS: 90,805 rows from ../data/dataset1_features.csv
+[ingestion]   Features available: 20/20
+[ingestion]   Benign: 41,783  Attack: 49,022 (54.0% attack)
+[train_eval] mlp repeat 1/15: F1=0.8398 AUROC=0.9323 FPR=0.1197
+[train_eval] mlp repeat 2/15: F1=0.8429 AUROC=0.9042 FPR=0.2315
+[train_eval] mlp repeat 3/15: F1=0.8272 AUROC=0.9293 FPR=0.2648
+[train_eval] mlp repeat 4/15: F1=0.8340 AUROC=0.8911 FPR=0.2258
+[train_eval] mlp repeat 5/15: F1=0.7796 AUROC=0.9086 FPR=0.2413
+[train_eval] mlp repeat 6/15: F1=0.7748 AUROC=0.9067 FPR=0.3562
+[train_eval] mlp repeat 7/15: F1=0.8676 AUROC=0.9327 FPR=0.0134
+[train_eval] mlp repeat 8/15: F1=0.8593 AUROC=0.9123 FPR=0.0151
+[train_eval] mlp repeat 9/15: F1=0.8557 AUROC=0.9146 FPR=0.0577
+[train_eval] mlp repeat 10/15: F1=0.7975 AUROC=0.9130 FPR=0.2583
+[train_eval] mlp repeat 11/15: F1=0.8566 AUROC=0.9177 FPR=0.0525
+[train_eval] mlp repeat 12/15: F1=0.8394 AUROC=0.9436 FPR=0.2707
+[train_eval] mlp repeat 13/15: F1=0.8768 AUROC=0.9219 FPR=0.0338
+[train_eval] mlp repeat 14/15: F1=0.8684 AUROC=0.9333 FPR=0.0486
+[train_eval] mlp repeat 15/15: F1=0.7887 AUROC=0.9223 FPR=0.2818
+  F1=0.8339±0.0336  AUROC=0.9189±0.0138
+Running CANDIDATE config...
+[ingestion] Loaded CAM-LDS: 90,805 rows from ../data/dataset1_features.csv
+[ingestion]   Features available: 20/20
+[ingestion]   Benign: 41,783  Attack: 49,022 (54.0% attack)
+[train_eval] mlp repeat 1/15: F1=0.8383 AUROC=0.9147 FPR=0.0702
+[train_eval] mlp repeat 2/15: F1=0.8207 AUROC=0.9252 FPR=0.0917
+[train_eval] mlp repeat 3/15: F1=0.8081 AUROC=0.9089 FPR=0.0106
+[train_eval] mlp repeat 4/15: F1=0.8471 AUROC=0.9056 FPR=0.0151
+[train_eval] mlp repeat 5/15: F1=0.8145 AUROC=0.9353 FPR=0.2926
+[train_eval] mlp repeat 6/15: F1=0.8620 AUROC=0.9082 FPR=0.0473
+[train_eval] mlp repeat 7/15: F1=0.8516 AUROC=0.9278 FPR=0.0196
+[train_eval] mlp repeat 8/15: F1=0.8481 AUROC=0.9160 FPR=0.0161
+[train_eval] mlp repeat 9/15: F1=0.8421 AUROC=0.9070 FPR=0.1004
+[train_eval] mlp repeat 10/15: F1=0.7778 AUROC=0.8957 FPR=0.3716
+[train_eval] mlp repeat 11/15: F1=0.8335 AUROC=0.8927 FPR=0.3116
+[train_eval] mlp repeat 12/15: F1=0.7406 AUROC=0.9140 FPR=0.5563
+[train_eval] mlp repeat 13/15: F1=0.8616 AUROC=0.9332 FPR=0.0252
+[train_eval] mlp repeat 14/15: F1=0.8553 AUROC=0.9168 FPR=0.0147
+[train_eval] mlp repeat 15/15: F1=0.7367 AUROC=0.9113 FPR=0.4647
+  F1=0.8225±0.0409  AUROC=0.9141±0.0123
+
+Delta F1: -0.0114  (signal/noise ratio: 0.21)
+VERDICT: NO REAL DIFFERENCE -- delta is within noise, keep production config as-is, cite this verification in the report instead of leaving it unresolved
+
+Saved: results/current/hyperparameter_verification/camlds_mlp_verdict.csv

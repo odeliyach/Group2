@@ -1,0 +1,56 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789206051.499040 2366670 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[ingestion] Loaded CasinoLimit: 91,692 rows from ../data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+
+[sensitivity] mlp / CasinoLimit / {'dropout': 0.1, 'learning_rate': 0.01}
+[train_eval] mlp repeat 1/3: F1=0.9417 AUROC=0.9988 FPR=0.0027
+[train_eval] mlp repeat 2/3: F1=0.8744 AUROC=0.9981 FPR=0.0031
+[train_eval] mlp repeat 3/3: F1=0.9211 AUROC=0.9988 FPR=0.0033
+
+[sensitivity] mlp / CasinoLimit / {'dropout': 0.1, 'learning_rate': 0.001}
+[train_eval] mlp repeat 1/3: F1=0.9131 AUROC=0.9982 FPR=0.0026
+[train_eval] mlp repeat 2/3: F1=0.9836 AUROC=0.9982 FPR=0.0029
+[train_eval] mlp repeat 3/3: F1=0.6437 AUROC=0.9985 FPR=0.0008
+
+[sensitivity] mlp / CasinoLimit / {'dropout': 0.1, 'learning_rate': 0.0001}
+[train_eval] mlp repeat 1/3: F1=0.8798 AUROC=0.9986 FPR=0.0015
+[train_eval] mlp repeat 2/3: F1=0.9731 AUROC=0.9981 FPR=0.0026
+[train_eval] mlp repeat 3/3: F1=0.9082 AUROC=0.9981 FPR=0.0028
+
+[sensitivity] mlp / CasinoLimit / {'dropout': 0.3, 'learning_rate': 0.01}
+[train_eval] mlp repeat 1/3: F1=0.9835 AUROC=0.9989 FPR=0.0027
+[train_eval] mlp repeat 2/3: F1=0.9427 AUROC=0.9982 FPR=0.0029
+[train_eval] mlp repeat 3/3: F1=0.9617 AUROC=0.9984 FPR=0.0034
+
+[sensitivity] mlp / CasinoLimit / {'dropout': 0.3, 'learning_rate': 0.001}
+[train_eval] mlp repeat 1/3: F1=0.8910 AUROC=0.9984 FPR=0.0028
+[train_eval] mlp repeat 2/3: F1=0.9853 AUROC=0.9980 FPR=0.0030
+[train_eval] mlp repeat 3/3: F1=0.9237 AUROC=0.9983 FPR=0.0027
+
+[sensitivity] mlp / CasinoLimit / {'dropout': 0.3, 'learning_rate': 0.0001}
+[train_eval] mlp repeat 1/3: F1=0.9193 AUROC=0.9985 FPR=0.0029
+[train_eval] mlp repeat 2/3: F1=0.2376 AUROC=0.9978 FPR=0.9795
+[train_eval] mlp repeat 3/3: F1=0.9162 AUROC=0.9989 FPR=0.0025
+
+[sensitivity] mlp / CasinoLimit / {'dropout': 0.5, 'learning_rate': 0.01}
+[train_eval] mlp repeat 1/3: F1=0.9424 AUROC=0.9986 FPR=0.0028
+[train_eval] mlp repeat 2/3: F1=0.9426 AUROC=0.9982 FPR=0.0029
+[train_eval] mlp repeat 3/3: F1=0.8888 AUROC=0.9985 FPR=0.0021
+
+[sensitivity] mlp / CasinoLimit / {'dropout': 0.5, 'learning_rate': 0.001}
+[train_eval] mlp repeat 1/3: F1=0.9831 AUROC=0.9990 FPR=0.0027
+[train_eval] mlp repeat 2/3: F1=0.9255 AUROC=0.9980 FPR=0.0029
+[train_eval] mlp repeat 3/3: F1=0.9668 AUROC=0.9987 FPR=0.0027
+
+[sensitivity] mlp / CasinoLimit / {'dropout': 0.5, 'learning_rate': 0.0001}
+[train_eval] mlp repeat 1/3: F1=0.8429 AUROC=0.9982 FPR=0.0026
+[train_eval] mlp repeat 2/3: F1=0.8730 AUROC=0.9979 FPR=0.0038
+[train_eval] mlp repeat 3/3: F1=0.9783 AUROC=0.9981 FPR=0.0031
+
+[sensitivity] Saved: results/current/sensitivity_results/casino_mlp_sensitivity.csv
+[sensitivity] Saved: results/current/sensitivity_results/casino_mlp_sensitivity.png

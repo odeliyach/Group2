@@ -1,0 +1,86 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789229184.885363 3466284 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:5 out of the last 32 calls to <function TensorFlowTrainer.make_predict_function.<locals>.one_step_on_data_distributed at 0x717c2a5448b0> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has reduce_retracing=True option that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
+WARNING:tensorflow:5 out of the last 472 calls to <function TensorFlowTrainer.make_predict_function.<locals>.one_step_on_data_distributed at 0x717c2a592290> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has reduce_retracing=True option that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
+[ingestion] Loaded CAM-LDS: 90,805 rows from ../data/dataset1_features.csv
+[ingestion]   Features available: 20/20
+[ingestion]   Benign: 41,783  Attack: 49,022 (54.0% attack)
+[camlds/mlp] repeat 0 fold 0: F1=0.7483 AUROC=0.9224 FPR=0.2391 FNR=0.2294  routed=17.2%  avg_stage2_weight=0.669
+[camlds/mlp] repeat 0 fold 1: F1=0.6671 AUROC=0.7810 FPR=0.8324 FNR=0.0333  routed=66.3%  avg_stage2_weight=0.835
+[camlds/mlp] repeat 0 fold 2: F1=0.9798 AUROC=0.9833 FPR=0.1580 FNR=0.0212  routed=4.1%  avg_stage2_weight=0.413
+[camlds/mlp] repeat 0 fold 3: F1=0.9626 AUROC=0.9836 FPR=0.1849 FNR=0.0322  routed=4.7%  avg_stage2_weight=0.626
+[camlds/mlp] repeat 0 fold 4: F1=0.8057 AUROC=0.9159 FPR=0.1327 FNR=0.1667  routed=56.3%  avg_stage2_weight=0.255
+[camlds/mlp] repeat 1 fold 0: F1=0.9159 AUROC=0.9793 FPR=0.3356 FNR=0.0270  routed=12.0%  avg_stage2_weight=0.351
+[camlds/mlp] repeat 1 fold 1: F1=0.8973 AUROC=0.9855 FPR=0.0235 FNR=0.1708  routed=12.6%  avg_stage2_weight=0.466
+[camlds/mlp] repeat 1 fold 2: F1=0.9377 AUROC=0.9585 FPR=0.2020 FNR=0.0692  routed=10.1%  avg_stage2_weight=0.430
+[camlds/mlp] repeat 1 fold 3: F1=0.6711 AUROC=0.7328 FPR=0.8225 FNR=0.1290  routed=57.5%  avg_stage2_weight=0.934
+[camlds/mlp] repeat 1 fold 4: F1=0.8713 AUROC=0.9692 FPR=0.1216 FNR=0.1033  routed=9.8%  avg_stage2_weight=0.662
+[camlds/mlp] repeat 2 fold 0: F1=0.8237 AUROC=0.9583 FPR=0.3824 FNR=0.0815  routed=20.4%  avg_stage2_weight=0.612
+[camlds/mlp] repeat 2 fold 1: F1=0.9501 AUROC=0.9835 FPR=0.2924 FNR=0.0232  routed=8.9%  avg_stage2_weight=0.341
+[camlds/mlp] repeat 2 fold 2: F1=0.6989 AUROC=0.8880 FPR=0.0027 FNR=0.4599  routed=38.8%  avg_stage2_weight=0.543
+[camlds/mlp] repeat 2 fold 3: F1=0.8960 AUROC=0.9709 FPR=0.0745 FNR=0.1646  routed=3.5%  avg_stage2_weight=0.521
+[camlds/mlp] repeat 2 fold 4: F1=0.9017 AUROC=0.9389 FPR=0.1948 FNR=0.1247  routed=8.4%  avg_stage2_weight=0.511
+[camlds/mlp] repeat 3 fold 0: F1=0.7212 AUROC=0.8586 FPR=0.7139 FNR=0.0203  routed=54.2%  avg_stage2_weight=0.705
+[camlds/mlp] repeat 3 fold 1: F1=0.9635 AUROC=0.9813 FPR=0.0116 FNR=0.0609  routed=39.3%  avg_stage2_weight=0.245
+[camlds/mlp] repeat 3 fold 2: F1=0.9319 AUROC=0.9579 FPR=0.1611 FNR=0.0735  routed=7.4%  avg_stage2_weight=0.490
+[camlds/mlp] repeat 3 fold 3: F1=0.6761 AUROC=0.9328 FPR=0.0223 FNR=0.4707  routed=8.6%  avg_stage2_weight=0.250
+[camlds/mlp] repeat 3 fold 4: F1=0.9319 AUROC=0.9757 FPR=0.0641 FNR=0.1043  routed=10.4%  avg_stage2_weight=0.560
+[camlds/mlp] repeat 4 fold 0: F1=0.9525 AUROC=0.9861 FPR=0.1017 FNR=0.0530  routed=8.2%  avg_stage2_weight=0.762
+[camlds/mlp] repeat 4 fold 1: F1=0.9501 AUROC=0.9780 FPR=0.2024 FNR=0.0453  routed=8.7%  avg_stage2_weight=0.638
+[camlds/mlp] repeat 4 fold 2: F1=0.7566 AUROC=0.8992 FPR=0.4086 FNR=0.0699  routed=61.8%  avg_stage2_weight=0.475
+[camlds/mlp] repeat 4 fold 3: F1=0.8874 AUROC=0.9750 FPR=0.0093 FNR=0.1799  routed=4.9%  avg_stage2_weight=0.715
+[camlds/mlp] repeat 4 fold 4: F1=0.8386 AUROC=0.8958 FPR=0.3250 FNR=0.1794  routed=10.4%  avg_stage2_weight=0.394
+[camlds/mlp] repeat 5 fold 0: F1=0.7185 AUROC=0.8805 FPR=0.3959 FNR=0.0824  routed=37.6%  avg_stage2_weight=0.802
+[camlds/mlp] repeat 5 fold 1: F1=0.8445 AUROC=0.8934 FPR=0.1016 FNR=0.2409  routed=3.9%  avg_stage2_weight=0.433
+[camlds/mlp] repeat 5 fold 2: F1=0.8892 AUROC=0.9780 FPR=0.2037 FNR=0.0758  routed=17.4%  avg_stage2_weight=0.502
+[camlds/mlp] repeat 5 fold 3: F1=0.9808 AUROC=0.9937 FPR=0.0526 FNR=0.0149  routed=3.6%  avg_stage2_weight=0.467
+[camlds/mlp] repeat 5 fold 4: F1=0.8136 AUROC=0.9362 FPR=0.5033 FNR=0.0894  routed=27.2%  avg_stage2_weight=0.374
+[camlds/mlp] repeat 6 fold 0: F1=0.7694 AUROC=0.8709 FPR=0.7458 FNR=0.0232  routed=48.8%  avg_stage2_weight=0.773
+[camlds/mlp] repeat 6 fold 1: F1=0.9655 AUROC=0.9868 FPR=0.1977 FNR=0.0112  routed=4.0%  avg_stage2_weight=0.646
+[camlds/mlp] repeat 6 fold 2: F1=0.9758 AUROC=0.9764 FPR=0.2454 FNR=0.0236  routed=3.4%  avg_stage2_weight=0.406
+[camlds/mlp] repeat 6 fold 3: F1=0.6446 AUROC=0.7315 FPR=0.0027 FNR=0.5193  routed=2.2%  avg_stage2_weight=0.577
+[camlds/mlp] repeat 6 fold 4: F1=0.7231 AUROC=0.9273 FPR=0.3149 FNR=0.1513  routed=24.2%  avg_stage2_weight=0.660
+[camlds/mlp] repeat 7 fold 0: F1=0.8084 AUROC=0.9288 FPR=0.5048 FNR=0.0288  routed=37.6%  avg_stage2_weight=0.711
+[camlds/mlp] repeat 7 fold 1: F1=0.9614 AUROC=0.9936 FPR=0.0842 FNR=0.0401  routed=5.1%  avg_stage2_weight=0.606
+[camlds/mlp] repeat 7 fold 2: F1=0.8628 AUROC=0.8692 FPR=0.0561 FNR=0.1947  routed=6.8%  avg_stage2_weight=0.466
+[camlds/mlp] repeat 7 fold 3: F1=0.7707 AUROC=0.9107 FPR=0.5327 FNR=0.1315  routed=36.1%  avg_stage2_weight=0.354
+[camlds/mlp] repeat 7 fold 4: F1=0.8159 AUROC=0.9680 FPR=0.5451 FNR=0.0343  routed=30.7%  avg_stage2_weight=0.277
+[camlds/mlp] repeat 8 fold 0: F1=0.7746 AUROC=0.8618 FPR=0.1651 FNR=0.2271  routed=14.1%  avg_stage2_weight=0.614
+[camlds/mlp] repeat 8 fold 1: F1=0.9886 AUROC=0.9686 FPR=0.1396 FNR=0.0115  routed=2.4%  avg_stage2_weight=0.732
+[camlds/mlp] repeat 8 fold 2: F1=0.6932 AUROC=0.8209 FPR=0.7400 FNR=0.0550  routed=55.9%  avg_stage2_weight=0.805
+[camlds/mlp] repeat 8 fold 3: F1=0.9404 AUROC=0.9681 FPR=0.2012 FNR=0.0750  routed=4.7%  avg_stage2_weight=0.477
+[camlds/mlp] repeat 8 fold 4: F1=0.9405 AUROC=0.9947 FPR=0.0278 FNR=0.0838  routed=8.3%  avg_stage2_weight=0.485
+[camlds/mlp] repeat 9 fold 0: F1=0.9131 AUROC=0.9802 FPR=0.0401 FNR=0.1259  routed=10.9%  avg_stage2_weight=0.488
+[camlds/mlp] repeat 9 fold 1: F1=0.9729 AUROC=0.9907 FPR=0.1653 FNR=0.0191  routed=4.9%  avg_stage2_weight=0.358
+[camlds/mlp] repeat 9 fold 2: F1=0.7320 AUROC=0.8252 FPR=0.7230 FNR=0.0998  routed=43.8%  avg_stage2_weight=0.429
+[camlds/mlp] repeat 9 fold 3: F1=0.9532 AUROC=0.9802 FPR=0.2073 FNR=0.0501  routed=12.1%  avg_stage2_weight=0.545
+[camlds/mlp] repeat 9 fold 4: F1=0.8719 AUROC=0.9135 FPR=0.0695 FNR=0.1426  routed=50.5%  avg_stage2_weight=0.518
+[camlds/mlp] repeat 10 fold 0: F1=0.8999 AUROC=0.9513 FPR=0.0172 FNR=0.1542  routed=12.6%  avg_stage2_weight=0.534
+[camlds/mlp] repeat 10 fold 1: F1=0.7597 AUROC=0.8857 FPR=0.5285 FNR=0.1731  routed=26.9%  avg_stage2_weight=0.524
+[camlds/mlp] repeat 10 fold 2: F1=0.9757 AUROC=0.9901 FPR=0.0674 FNR=0.0337  routed=6.0%  avg_stage2_weight=0.501
+[camlds/mlp] repeat 10 fold 3: F1=0.6230 AUROC=0.7995 FPR=0.6412 FNR=0.0037  routed=61.9%  avg_stage2_weight=0.982
+[camlds/mlp] repeat 10 fold 4: F1=0.8853 AUROC=0.9041 FPR=0.0597 FNR=0.1877  routed=6.0%  avg_stage2_weight=0.601
+[camlds/mlp] repeat 11 fold 0: F1=0.7023 AUROC=0.8611 FPR=0.7827 FNR=0.0381  routed=57.4%  avg_stage2_weight=0.501
+[camlds/mlp] repeat 11 fold 1: F1=0.9028 AUROC=0.9921 FPR=0.0263 FNR=0.1326  routed=3.1%  avg_stage2_weight=0.641
+[camlds/mlp] repeat 11 fold 2: F1=0.8608 AUROC=0.9172 FPR=0.2013 FNR=0.1819  routed=13.3%  avg_stage2_weight=0.551
+[camlds/mlp] repeat 11 fold 3: F1=0.9648 AUROC=0.9838 FPR=0.1015 FNR=0.0338  routed=3.9%  avg_stage2_weight=0.610
+[camlds/mlp] repeat 11 fold 4: F1=0.9336 AUROC=0.9752 FPR=0.0680 FNR=0.0693  routed=5.6%  avg_stage2_weight=0.394
+[camlds/mlp] repeat 12 fold 0: F1=0.7319 AUROC=0.8315 FPR=0.8495 FNR=0.0252  routed=56.5%  avg_stage2_weight=0.574
+[camlds/mlp] repeat 12 fold 1: F1=0.8898 AUROC=0.9424 FPR=0.1596 FNR=0.1513  routed=17.2%  avg_stage2_weight=0.616
+[camlds/mlp] repeat 12 fold 2: F1=0.9550 AUROC=0.9782 FPR=0.0194 FNR=0.0668  routed=1.4%  avg_stage2_weight=0.660
+[camlds/mlp] repeat 12 fold 3: F1=0.6259 AUROC=0.8954 FPR=0.5840 FNR=0.0776  routed=42.4%  avg_stage2_weight=0.447
+[camlds/mlp] repeat 12 fold 4: F1=0.8882 AUROC=0.9606 FPR=0.1062 FNR=0.1580  routed=8.9%  avg_stage2_weight=0.442
+[camlds/mlp] repeat 13 fold 0: F1=0.9440 AUROC=0.9831 FPR=0.1662 FNR=0.0496  routed=10.7%  avg_stage2_weight=0.372
+[camlds/mlp] repeat 13 fold 1: F1=0.9230 AUROC=0.9879 FPR=0.0259 FNR=0.1267  routed=10.0%  avg_stage2_weight=0.575
+[camlds/mlp] repeat 13 fold 2: F1=0.6543 AUROC=0.8057 FPR=0.7584 FNR=0.0117  routed=52.3%  avg_stage2_weight=0.566
+[camlds/mlp] repeat 13 fold 3: F1=0.6390 AUROC=0.8324 FPR=0.0282 FNR=0.5217  routed=4.9%  avg_stage2_weight=0.451
+[camlds/mlp] repeat 13 fold 4: F1=0.8975 AUROC=0.9467 FPR=0.0291 FNR=0.1481  routed=4.7%  avg_stage2_weight=0.464
+[camlds/mlp] repeat 14 fold 0: F1=0.6784 AUROC=0.8668 FPR=0.3842 FNR=0.1207  routed=41.7%  avg_stage2_weight=0.878
+[camlds/mlp] repeat 14 fold 1: F1=0.9235 AUROC=0.9587 FPR=0.1623 FNR=0.0879  routed=10.6%  avg_stage2_weight=0.433
+[camlds/mlp] repeat 14 fold 2: F1=0.9577 AUROC=0.9791 FPR=0.3004 FNR=0.0262  routed=5.3%  avg_stage2_weight=0.580
+[camlds/mlp] repeat 14 fold 3: F1=0.5750 AUROC=0.8693 FPR=0.2508 FNR=0.3929  routed=19.8%  avg_stage2_weight=0.684
+[camlds/mlp] repeat 14 fold 4: F1=0.9500 AUROC=0.9842 FPR=0.0919 FNR=0.0579  routed=6.5%  avg_stage2_weight=0.606
+
+[camlds/mlp] Weighted cascade summary (75/75 repeat-folds, 0 skipped): F1=0.8454+/-0.1139  AUROC=0.9283+/-0.0648  avg routed=20.4%  avg stage2 weight when routed=0.548

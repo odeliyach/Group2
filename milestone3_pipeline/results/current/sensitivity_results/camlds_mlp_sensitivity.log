@@ -1,0 +1,55 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789206051.512213 2366669 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[ingestion] Loaded CAM-LDS: 90,805 rows from ../data/dataset1_features.csv
+[ingestion]   Features available: 20/20
+[ingestion]   Benign: 41,783  Attack: 49,022 (54.0% attack)
+
+[sensitivity] mlp / CAM-LDS / {'dropout': 0.1, 'learning_rate': 0.01}
+[train_eval] mlp repeat 1/3: F1=0.8421 AUROC=0.9187 FPR=0.1969
+[train_eval] mlp repeat 2/3: F1=0.8346 AUROC=0.9198 FPR=0.2672
+[train_eval] mlp repeat 3/3: F1=0.8449 AUROC=0.9482 FPR=0.2268
+
+[sensitivity] mlp / CAM-LDS / {'dropout': 0.1, 'learning_rate': 0.001}
+[train_eval] mlp repeat 1/3: F1=0.8526 AUROC=0.9253 FPR=0.1557
+[train_eval] mlp repeat 2/3: F1=0.8741 AUROC=0.9299 FPR=0.0218
+[train_eval] mlp repeat 3/3: F1=0.8326 AUROC=0.9149 FPR=0.1075
+
+[sensitivity] mlp / CAM-LDS / {'dropout': 0.1, 'learning_rate': 0.0001}
+[train_eval] mlp repeat 1/3: F1=0.8430 AUROC=0.9199 FPR=0.1907
+[train_eval] mlp repeat 2/3: F1=0.8352 AUROC=0.9130 FPR=0.2813
+[train_eval] mlp repeat 3/3: F1=0.8495 AUROC=0.9466 FPR=0.2358
+
+[sensitivity] mlp / CAM-LDS / {'dropout': 0.3, 'learning_rate': 0.01}
+[train_eval] mlp repeat 1/3: F1=0.8426 AUROC=0.9259 FPR=0.1185
+[train_eval] mlp repeat 2/3: F1=0.8392 AUROC=0.9153 FPR=0.2752
+[train_eval] mlp repeat 3/3: F1=0.7640 AUROC=0.9253 FPR=0.4674
+
+[sensitivity] mlp / CAM-LDS / {'dropout': 0.3, 'learning_rate': 0.001}
+[train_eval] mlp repeat 1/3: F1=0.8463 AUROC=0.9215 FPR=0.1511
+[train_eval] mlp repeat 2/3: F1=0.8363 AUROC=0.9218 FPR=0.2722
+[train_eval] mlp repeat 3/3: F1=0.8413 AUROC=0.9393 FPR=0.2241
+
+[sensitivity] mlp / CAM-LDS / {'dropout': 0.3, 'learning_rate': 0.0001}
+[train_eval] mlp repeat 1/3: F1=0.8476 AUROC=0.9191 FPR=0.0964
+[train_eval] mlp repeat 2/3: F1=0.8330 AUROC=0.9259 FPR=0.2875
+[train_eval] mlp repeat 3/3: F1=0.8733 AUROC=0.9500 FPR=0.0287
+
+[sensitivity] mlp / CAM-LDS / {'dropout': 0.5, 'learning_rate': 0.01}
+[train_eval] mlp repeat 1/3: F1=0.8429 AUROC=0.9198 FPR=0.1167
+[train_eval] mlp repeat 2/3: F1=0.8605 AUROC=0.9080 FPR=0.0351
+[train_eval] mlp repeat 3/3: F1=0.7785 AUROC=0.9216 FPR=0.4536
+
+[sensitivity] mlp / CAM-LDS / {'dropout': 0.5, 'learning_rate': 0.001}
+[train_eval] mlp repeat 1/3: F1=0.8463 AUROC=0.9290 FPR=0.1508
+[train_eval] mlp repeat 2/3: F1=0.8389 AUROC=0.9261 FPR=0.2744
+[train_eval] mlp repeat 3/3: F1=0.8417 AUROC=0.9387 FPR=0.2233
+
+[sensitivity] mlp / CAM-LDS / {'dropout': 0.5, 'learning_rate': 0.0001}
+[train_eval] mlp repeat 1/3: F1=0.8403 AUROC=0.9201 FPR=0.0954
+[train_eval] mlp repeat 2/3: F1=0.8517 AUROC=0.9304 FPR=0.0612
+[train_eval] mlp repeat 3/3: F1=0.8613 AUROC=0.9221 FPR=0.0162
+
+[sensitivity] Saved: results/current/sensitivity_results/camlds_mlp_sensitivity.csv
+[sensitivity] Saved: results/current/sensitivity_results/camlds_mlp_sensitivity.png
