@@ -104,6 +104,51 @@ FEWSHOT_EXAMPLE = (
     "--- END EXAMPLE ---"
 )
 
+# A second, contrasting worked example. Deliberately uses the SAME vote
+# pattern as FEWSHOT_EXAMPLE (XGBoost -> BENIGN, CNN -> MALICIOUS) but a
+# different feature profile that supports the opposite verdict (BENIGN,
+# agrees_with xgb). A single MALICIOUS/agrees-with-cnn example risks teaching
+# "when CNN and XGBoost disagree, side with CNN" as a surface pattern rather
+# than teaching the reasoning process; pairing it with this example -- same
+# vote shape, opposite correct answer -- forces the behavioural evidence,
+# not which model said what, to be the thing that decides the verdict.
+FEWSHOT_EXAMPLE_2 = (
+    "--- EXAMPLE ---\n"
+    "=== RECORD UNDER REVIEW ===\n"
+    "Model votes:  XGBoost -> BENIGN (p_malicious=0.22)   |   CNN -> MALICIOUS (p_malicious=0.58)\n"
+    "\n"
+    "Behavioural features  (value | pctile vs benign pop | pctile vs attack pop | meaning)\n"
+    "  shell_from_service     1        p85    p55    a shell was spawned from a service/daemon context\n"
+    "  events_per_second      42       p90    p45    syscall throughput\n"
+    "  parent_child_rarity    0.02     p10    p5     rarity of this parent->child exec pair (1 = never seen before)\n"
+    "  max_uid_euid_delta     0        p40    p10    largest gap between real and effective UID; large = privilege transition\n"
+    "  lifetime_seconds       4        p15    p20    process wall-clock lifetime\n"
+    "  (... remaining features omitted in this example ...)\n"
+    "\n"
+    "Notable deviations (most unusual vs benign, first = most extreme):\n"
+    "  shell_from_service, events_per_second, parent_child_rarity, lifetime_seconds, max_uid_euid_delta\n"
+    "\n"
+    "Known failure patterns in this dataset (from labelled error analysis):\n"
+    "  - Benign rows misflagged as attack tend to have elevated parent_child_rarity and uid_changed with short lifetime_seconds.\n"
+    "  - Missed attacks tend to have auid_euid_mismatch set but low max_uid_euid_delta and priv_op_count.\n"
+    "\n"
+    "--- IDEAL ANSWER ---\n"
+    '{"verdict": "BENIGN", "confidence": 0.78, "rationale_steps": ['
+    '"Privilege state: max_uid_euid_delta and auid_euid_mismatch are both low/unset -- no genuine UID/EUID transition.", '
+    '"Mechanism: shell_from_service is set, but without is_suid_exec or elevated priv_op_count alongside it, a single flag is weak evidence of escalation on its own.", '
+    '"Behavioural anomaly: parent_child_rarity is near 0 (a common, previously-seen exec pair) and no sensitive-path access -- not the profile of a novel attack chain.", '
+    '"Benign-explanation test: regular high-throughput, short-lifetime execution from a service context is consistent with a routine health-check or monitoring script.", '
+    '"Decide: the only elevated signal (shell_from_service) is explained by ordinary service activity and is not corroborated by any privilege-transition evidence; this supports XGBoost over CNN\'s flag on this one feature."], '
+    '"key_features": ["shell_from_service", "events_per_second", "parent_child_rarity", "max_uid_euid_delta", "lifetime_seconds"], '
+    '"agrees_with": "xgb"}\n'
+    "--- END EXAMPLE ---"
+)
+
+# Combined constant used when building the live prompt (llm_triage_client.py).
+# FEWSHOT_EXAMPLE itself is kept unchanged and importable on its own --
+# llm_triage_ablation.py's "cnn_first" variant reads it directly.
+FEWSHOT_EXAMPLES = FEWSHOT_EXAMPLE + "\n\n" + FEWSHOT_EXAMPLE_2
+
 KNOWN_FAILURE_BLOCKS = {
     "camlds": (
         "Known failure patterns in this dataset (from labelled error analysis):\n"

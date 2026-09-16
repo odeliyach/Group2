@@ -14,17 +14,30 @@ from jsonschema import validate, ValidationError
 
 from config import FULL_FEATURE_LIST, LLM_TRIAGE
 from llm_triage_prompts import (SYSTEM_PROMPT, COT_RUBRIC, SCHEMA_INSTRUCTION,
-                                FEWSHOT_EXAMPLE, ARBITRATION_SCHEMA_V1)
+                                FEWSHOT_EXAMPLES, ARBITRATION_SCHEMA_V1)
 
 _EMPTY = {"verdict": None, "confidence": None, "rationale_steps": [],
           "key_features": [], "agrees_with": None}
 
 
-def build_prompt(context_str):
-    return "\n\n".join([
-        SYSTEM_PROMPT, COT_RUBRIC, SCHEMA_INSTRUCTION, FEWSHOT_EXAMPLE,
+def build_messages(context_str):
+    """Role-tagged messages for the arbitration call.
+
+    SYSTEM_PROMPT is delivered as an actual system-role turn rather than
+    concatenated into one flat string: both backbones are -Instruct
+    checkpoints, fine-tuned to expect role-separated input, and collapsing
+    everything into a single blob (or, on vLLM, skipping the chat template
+    entirely via a raw completion call) means the model isn't being prompted
+    the way it was tuned to expect.
+    """
+    user_content = "\n\n".join([
+        COT_RUBRIC, SCHEMA_INSTRUCTION, FEWSHOT_EXAMPLES,
         "--- RECORD TO CLASSIFY ---", context_str,
     ])
+    return [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user_content},
+    ]
 
 
 def _extract_json(text):
@@ -69,18 +82,28 @@ class LLMClient:
         self._engine_error = None  # cached engine-init failure: fail fast, don't retry per row
 
     # -- backend dispatch -------------------------------------------------
-    def _generate(self, prompt):
+    def _generate(self, messages):
         if self.backend == "ollama":
-            return self._generate_ollama(prompt)
+            return self._generate_ollama(messages)
         if self.backend == "vllm":
-            return self._generate_vllm(prompt)
+            return self._generate_vllm(messages)
         raise ValueError(f"unknown backend {self.backend!r}")
 
-    def _generate_ollama(self, prompt):
+    def _generate_ollama(self, messages):
         import requests
+        # Ollama's /api/generate is single-turn: it takes one "system" string
+        # and one "prompt" string, applying the model's own Modelfile template
+        # to slot them into the right roles. Send SYSTEM_PROMPT via "system"
+        # rather than folding it into "prompt" -- otherwise the whole thing
+        # (system + rubric + schema + few-shot + record) lands in the user
+        # turn undifferentiated, and the instruct-tuned system/user split the
+        # model was trained on is never actually used.
+        system_content = "\n\n".join(m["content"] for m in messages if m["role"] == "system")
+        turn_content = "\n\n".join(m["content"] for m in messages if m["role"] != "system")
         r = requests.post(
             f"http://{os.environ.get('OLLAMA_HOST', '127.0.0.1:11434')}/api/generate",
-            json={"model": self.model_id, "prompt": prompt, "stream": False,
+            json={"model": self.model_id, "system": system_content, "prompt": turn_content,
+                  "stream": False,
                   # Modern Ollama constrains output to a JSON schema via `format`.
                   "format": ARBITRATION_SCHEMA_V1,
                   "options": {"temperature": self.temperature, "seed": self.seed,
@@ -90,7 +113,7 @@ class LLMClient:
         r.raise_for_status()
         return r.json()["response"]
 
-    def _generate_vllm(self, prompt):
+    def _generate_vllm(self, messages):
         if self._engine is None:
             # Engine construction is expensive (tens of seconds) and, if the
             # config is wrong for this GPU (wrong dtype, insufficient VRAM,
@@ -103,7 +126,18 @@ class LLMClient:
             except Exception as e:
                 self._engine_error = e
                 raise
-        return self._engine.generate([prompt], self._sp)[0].outputs[0].text
+        try:
+            # Preferred: LLM.chat() applies the model's own chat template, so
+            # the system/user role split actually reaches the model instead
+            # of being flattened into one raw-completion string.
+            return self._engine.chat([messages], self._sp)[0].outputs[0].text
+        except AttributeError:
+            # Older vLLM without LLM.chat() -- apply the template ourselves
+            # rather than silently falling back to an untemplated prompt.
+            tokenizer = self._engine.get_tokenizer()
+            prompt = tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True)
+            return self._engine.generate([prompt], self._sp)[0].outputs[0].text
 
     def _build_vllm_engine(self):
         from vllm import LLM, SamplingParams
@@ -134,8 +168,8 @@ class LLMClient:
 
     # -- public API -----------------------------------------------------
     def arbitrate(self, context_str):
-        prompt = build_prompt(context_str)
-        raw = self._generate(prompt)
+        messages = build_messages(context_str)
+        raw = self._generate(messages)
         try:
             obj = _try_parse(raw)
             obj.update({"parse_status": "ok", "raw": raw})
@@ -143,9 +177,12 @@ class LLMClient:
         except (ValueError, ValidationError, json.JSONDecodeError):
             pass
 
-        repair_prompt = (prompt + "\n\nYour previous output was invalid. Return ONLY a "
-                         "single valid JSON object matching the schema, nothing else.")
-        raw2 = self._generate(repair_prompt)
+        repair_messages = messages + [
+            {"role": "assistant", "content": raw},
+            {"role": "user", "content": "Your previous output was invalid. Return ONLY a "
+             "single valid JSON object matching the schema, nothing else."},
+        ]
+        raw2 = self._generate(repair_messages)
         try:
             obj = _try_parse(raw2)
             obj.update({"parse_status": "repaired", "raw": raw2})

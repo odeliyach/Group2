@@ -27,18 +27,31 @@ def notable_deviations(row, feat_cols, pct_tables, top_n=5):
     return [f for _, _, f in scored[:top_n]]
 
 
-def build_context(row, feat_cols, pct_tables, dataset_key):
+# Cap the rendered feature table to the most-deviating features rather than
+# all of FULL_FEATURE_LIST (20). Most rows have ~15 features sitting near the
+# 50th percentile in both populations -- uninformative for the rubric, but
+# still tokens the model has to attend over on every single call, and every
+# call's latency matters on CPU-only inference. notable_deviations() already
+# ranks by |percentile - 50|, so reuse that ranking for the table itself
+# instead of computing a separate 5-feature summary over the full list.
+TOP_N_FEATURES_IN_TABLE = 8
+
+
+def build_context(row, feat_cols, pct_tables, dataset_key, top_n=TOP_N_FEATURES_IN_TABLE):
     xgb_call = "MALICIOUS" if int(row["pred_xgb"]) == 1 else "BENIGN"
     cnn_call = "MALICIOUS" if int(row["pred_cnn"]) == 1 else "BENIGN"
+
+    shortlist = notable_deviations(row, feat_cols, pct_tables, top_n=top_n)
 
     lines = [
         "=== RECORD UNDER REVIEW ===",
         (f"Model votes:  XGBoost -> {xgb_call} (p_malicious={float(row['proba_xgb']):.2f})   |   "
          f"CNN -> {cnn_call} (p_malicious={float(row['proba_cnn']):.2f})"),
         "",
-        "Behavioural features  (value | pctile vs benign pop | pctile vs attack pop | meaning)",
+        f"Behavioural features, top {len(shortlist)} most unusual vs benign "
+        "(value | pctile vs benign pop | pctile vs attack pop | meaning)",
     ]
-    for f in feat_cols:
+    for f in shortlist:
         v = float(row[f])
         pb = percentile_label(v, pct_tables[f]["benign"])
         pa = percentile_label(v, pct_tables[f]["attack"])
@@ -46,8 +59,8 @@ def build_context(row, feat_cols, pct_tables, dataset_key):
 
     lines += [
         "",
-        "Notable deviations (most unusual vs benign, first = most extreme):",
-        "  " + ", ".join(notable_deviations(row, feat_cols, pct_tables)),
+        "Most-deviating features, in order (first = most extreme):",
+        "  " + ", ".join(shortlist[:5]),
         "",
         KNOWN_FAILURE_BLOCKS[dataset_key],
     ]
