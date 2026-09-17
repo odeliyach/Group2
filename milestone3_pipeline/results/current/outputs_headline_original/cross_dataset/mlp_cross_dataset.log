@@ -1,0 +1,24 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789229495.903186 3490446 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[ingestion] Loaded CAM-LDS: 90,805 rows from ../data/dataset1_features.csv
+[ingestion]   Features available: 20/20
+[ingestion]   Benign: 41,783  Attack: 49,022 (54.0% attack)
+[ingestion] Loaded CasinoLimit: 91,692 rows from ../data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+[cross_dataset] Restricting to 17 shared features (dropped ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'] -- not present in the other dataset)
+
+[cross_dataset] Train=CAM-LDS -> Test=CasinoLimit  (model=mlp, repeat 1/1, seed=42)
+  In-sample   (train==test): F1=0.8691 AUROC=0.9504
+  Cross-dataset (unseen env): F1=0.1440 AUROC=0.2272 FPR=0.9969  (F1 drop: +0.7251)
+
+[cross_dataset] Train=CasinoLimit -> Test=CAM-LDS  (model=mlp, repeat 1/1, seed=42)
+  In-sample   (train==test): F1=0.9913 AUROC=0.9994
+  Cross-dataset (unseen env): F1=0.6843 AUROC=0.6242 FPR=0.8898  (F1 drop: +0.3070)
+
+[cross_dataset] Saved: results/current/outputs_headline_original/cross_dataset/cross_dataset_mlp.csv
+
+[cross_dataset] Combined summary saved: results/current/outputs_headline_original/cross_dataset/cross_dataset_all_models.csv

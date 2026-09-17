@@ -46,7 +46,7 @@ def run_one(dataset_key: str, model_key: str, data_dir: str, feature_policy: str
 def main():
     p = argparse.ArgumentParser(description="Milestone 3 - Step 7 pipeline")
     p.add_argument("--dataset", choices=["camlds", "casino", "both"], default="both")
-    p.add_argument("--model", choices=["rf", "xgb", "cnn", "iforest", "all"], default="all")
+    p.add_argument("--model", choices=["rf", "xgb", "cnn", "mlp", "iforest", "all"], default="all")
     p.add_argument("--feature-policy", choices=["full", "reduced"], default="full")
     p.add_argument("--data-dir", default=".")
     p.add_argument("--out", default="outputs")

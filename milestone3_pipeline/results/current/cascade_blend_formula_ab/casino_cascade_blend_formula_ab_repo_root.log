@@ -1,0 +1,17 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789110474.169558 2230070 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[ingestion] Loaded CasinoLimit: 91,692 rows from data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+[casino] fold 0: SKIPPED -- degenerate test fold.
+[casino] fold 1: routed=0.0%  flat_F1=0.9901  weighted_F1=0.9901  delta=+0.0000
+[casino] fold 2: routed=0.0%  flat_F1=0.9757  weighted_F1=0.9757  delta=+0.0000
+[casino] fold 3: routed=6.4%  flat_F1=0.9687  weighted_F1=0.9961  delta=+0.0274
+[casino] fold 4: routed=0.0%  flat_F1=0.9982  weighted_F1=0.9982  delta=+0.0000
+
+[casino] A/B summary (4/5 folds usable):
+  flat_F1:     0.9832 +/- 0.0134
+  weighted_F1: 0.9900 +/- 0.0102

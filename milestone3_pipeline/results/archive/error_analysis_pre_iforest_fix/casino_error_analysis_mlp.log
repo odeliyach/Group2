@@ -1,0 +1,176 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789205920.748049 2363577 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[error_analysis] dataset=casino models=['rf', 'xgb', 'mlp', 'iforest']
+[ingestion] Loaded CasinoLimit: 91,692 rows from ../data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+[error_analysis] rf fold 1/5 done
+[error_analysis] rf fold 2/5 done
+[error_analysis] rf fold 3/5 done
+[error_analysis] rf fold 4/5 done
+[error_analysis] rf fold 5/5 done
+[error_analysis] xgb fold 1/5 done
+[error_analysis] xgb fold 2/5 done
+[error_analysis] xgb fold 3/5 done
+[error_analysis] xgb fold 4/5 done
+[error_analysis] xgb fold 5/5 done
+[error_analysis] mlp fold 1/5 done
+[error_analysis] mlp fold 2/5 done
+[error_analysis] mlp fold 3/5 done
+[error_analysis] mlp fold 4/5 done
+[error_analysis] mlp fold 5/5 done
+[error_analysis] iforest fold 1/5 done
+[error_analysis] iforest fold 2/5 done
+[error_analysis] iforest fold 3/5 done
+[error_analysis] iforest fold 4/5 done
+[error_analysis] iforest fold 5/5 done
+[error_analysis] Saved full row-level predictions: results/current/error_analysis_results/casino_mlp/casino_error_rows.csv
+
+=================================================================
+rf
+=================================================================
+FN rate by technique (worst first):
+errtype_rf   FN    TP  total   fn_rate
+technique                             
+T1222        79   715    794  0.099496
+T1595       116  1880   1996  0.058116
+T1059         0  5001   5001  0.000000
+T1548         0  7902   7902  0.000000
+
+Benign FP rate: 211/75999 (0.28%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+               feature   FN_mean     TP_mean  FN_over_TP_ratio
+9     failed_call_rate  0.674359    0.046802         14.408845
+10   failed_call_count  0.687179    0.052716         13.035383
+7   max_uid_euid_delta  0.000000  230.314557          0.000000
+11       priv_op_count  0.000000    0.024068          0.000000
+12          exec_count  0.000000    0.959350          0.000000
+
+Top 5 features most different between false-positive and true-negative benign rows:
+               feature   FP_mean   TN_mean  cohens_d
+12          exec_count  0.890995  0.000000  4.033652
+13   file_access_count  0.000000  1.023869 -3.759573
+4          uid_is_root  0.526066  0.000686  1.482465
+6            euid_root  0.526066  0.000686  1.482465
+8   auid_euid_mismatch  0.526066  0.998958 -1.333414
+
+=================================================================
+xgb
+=================================================================
+FN rate by technique (worst first):
+errtype_xgb   FN    TP  total   fn_rate
+technique                              
+T1222         84   710    794  0.105793
+T1595        116  1880   1996  0.058116
+T1548         62  7840   7902  0.007846
+T1059          0  5001   5001  0.000000
+
+Benign FP rate: 206/75999 (0.27%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+                  feature   FN_mean     TP_mean  FN_over_TP_ratio
+10      failed_call_count  0.977099    0.045039         21.694415
+9        failed_call_rate  0.738550    0.042987         17.180742
+7      max_uid_euid_delta  0.000000  231.314562          0.000000
+15     shell_from_service  0.000000    0.210485          0.000000
+16  sensitive_path_access  0.000000    0.000130          0.000000
+
+Top 5 features most different between false-positive and true-negative benign rows:
+               feature   FP_mean   TN_mean  cohens_d
+12          exec_count  0.912621  0.000000  4.559330
+13   file_access_count  0.000000  1.023802 -3.758573
+4          uid_is_root  0.519417  0.000739  1.462434
+6            euid_root  0.519417  0.000739  1.462434
+8   auid_euid_mismatch  0.519417  0.998944 -1.351196
+
+=================================================================
+mlp
+=================================================================
+FN rate by technique (worst first):
+errtype_mlp    FN    TP  total   fn_rate
+technique                               
+T1222         330   464    794  0.415617
+T1059        1211  3790   5001  0.242152
+T1548         691  7211   7902  0.087446
+T1595         123  1873   1996  0.061623
+
+Benign FP rate: 199/75999 (0.26%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+               feature     FN_mean     TP_mean  FN_over_TP_ratio
+15  shell_from_service    0.000000    0.243515          0.000000
+4          uid_is_root    0.036518    0.481856          0.075786
+11       priv_op_count    0.004246    0.027215          0.156025
+6            euid_root    0.329936    0.696656          0.473600
+7   max_uid_euid_delta  293.711677  215.753786          1.361328
+
+Top 5 features most different between false-positive and true-negative benign rows:
+               feature   FP_mean   TN_mean  cohens_d
+12          exec_count  0.944724  0.000000  5.831814
+13   file_access_count  0.000000  1.023707 -3.757174
+4          uid_is_root  0.507538  0.000818  1.427457
+6            euid_root  0.507538  0.000818  1.427457
+8   auid_euid_mismatch  0.507538  0.998931 -1.383596
+
+=================================================================
+iforest
+=================================================================
+FN rate by technique (worst first):
+errtype_iforest    FN    TP  total   fn_rate
+technique                                   
+T1595            1936    60   1996  0.969940
+T1548            7191   711   7902  0.910023
+T1059             579  4422   5001  0.115777
+T1222              75   719    794  0.094458
+
+Benign FP rate: 360/75999 (0.47%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+                  feature     FN_mean     TP_mean  FN_over_TP_ratio
+13      file_access_count    0.006441    0.000169         38.079542
+9        failed_call_rate    0.071721    0.026274          2.729695
+10      failed_call_count    0.078826    0.030447          2.589006
+7      max_uid_euid_delta  293.397608  118.351319          2.479040
+16  sensitive_path_access    0.000000    0.000338          0.000000
+
+Top 5 features most different between false-positive and true-negative benign rows:
+              feature     FP_mean   TN_mean  cohens_d
+0    lifetime_seconds  144.817081  1.354093  1.110426
+4         uid_is_root    0.133333  0.001520  0.544061
+6           euid_root    0.133333  0.001520  0.544061
+8  auid_euid_mismatch    0.872222  0.998242 -0.528961
+9    failed_call_rate    0.105572  0.000185  0.492832
+
+=================================================================
+Generating charts
+=================================================================
+[error_analysis] Saved: results/current/error_analysis_results/casino_mlp/casino_technique_fn_rates.png
+[error_analysis] Saved: results/current/error_analysis_results/casino_mlp/casino_fp_feature_comparison.png
+
+=================================================================
+Pairwise model comparisons
+=================================================================
+
+rf wrong & xgb right: 7 rows
+rf right & xgb wrong: 69 rows
+
+rf wrong & mlp right: 12 rows
+rf right & mlp wrong: 2160 rows
+
+rf wrong & iforest right: 325 rows
+rf right & iforest wrong: 10060 rows
+
+xgb wrong & mlp right: 78 rows
+xgb right & mlp wrong: 2164 rows
+
+xgb wrong & iforest right: 323 rows
+xgb right & iforest wrong: 9996 rows
+
+mlp wrong & iforest right: 2482 rows
+mlp right & iforest wrong: 10069 rows
+
+[error_analysis] Done. All outputs in results/current/error_analysis_results/casino_mlp/

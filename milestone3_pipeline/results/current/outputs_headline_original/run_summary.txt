@@ -1,0 +1,1 @@
+CAM-LDS / mlp: F1=0.8395+/-0.0333  AUROC=0.9308+/-0.0097  Precision=0.8802  Recall=0.8124  FPR=0.1493

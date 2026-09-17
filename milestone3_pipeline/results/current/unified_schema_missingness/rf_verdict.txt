@@ -1,0 +1,3 @@
+Delta AUROC: -0.0000
+Delta F1(recalibrated): +0.0007
+VERDICT: NO MEANINGFUL DIFFERENCE -- the model doesn't exploit the missingness signal; the 17-feature intersection is not costing real transfer performance

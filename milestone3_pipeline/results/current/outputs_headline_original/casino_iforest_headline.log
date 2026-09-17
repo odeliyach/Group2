@@ -1,0 +1,31 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789229159.569478 3465378 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+======================================================================
+Dataset=casino  Model=iforest
+======================================================================
+[ingestion] Loaded CasinoLimit: 91,692 rows from ../data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+[pipeline] Using 17 features (policy='full')
+[train_eval] iforest repeat 1/15: F1=0.5166 AUROC=0.8559 FPR=0.0174
+[train_eval] iforest repeat 2/15: F1=0.9767 AUROC=0.9111 FPR=0.0095
+[train_eval] iforest repeat 3/15: F1=0.8882 AUROC=0.8303 FPR=0.0100
+[train_eval] iforest repeat 4/15: F1=0.8837 AUROC=0.8670 FPR=0.0090
+[train_eval] iforest repeat 5/15: F1=0.6918 AUROC=0.5596 FPR=0.0060
+[train_eval] iforest repeat 6/15: F1=0.6711 AUROC=0.9861 FPR=0.0061
+[train_eval] iforest repeat 7/15: F1=0.7501 AUROC=0.6445 FPR=0.0072
+[train_eval] iforest repeat 8/15: F1=0.4828 AUROC=0.4435 FPR=0.0064
+[train_eval] iforest repeat 9/15: F1=0.7823 AUROC=0.8138 FPR=0.0066
+[train_eval] iforest repeat 10/15: F1=0.8326 AUROC=0.9264 FPR=0.0217
+[train_eval] iforest repeat 11/15: F1=0.9140 AUROC=0.9250 FPR=0.0226
+[train_eval] iforest repeat 12/15: F1=0.7644 AUROC=0.6308 FPR=0.0065
+[train_eval] iforest repeat 13/15: F1=0.7904 AUROC=0.7726 FPR=0.0069
+[train_eval] iforest repeat 14/15: F1=0.7415 AUROC=0.7215 FPR=0.0185
+[train_eval] iforest repeat 15/15: F1=0.8836 AUROC=0.9781 FPR=0.0201
+
+[SUMMARY] CasinoLimit / iforest: F1=0.7713+/-0.1393  AUROC=0.7911+/-0.1609  Precision=0.9227  Recall=0.6840  FPR=0.0116
+
+CasinoLimit / iforest: F1=0.7713+/-0.1393  AUROC=0.7911+/-0.1609  Precision=0.9227  Recall=0.6840  FPR=0.0116

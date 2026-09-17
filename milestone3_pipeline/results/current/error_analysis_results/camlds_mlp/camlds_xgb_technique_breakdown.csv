@@ -1,0 +1,16 @@
+technique,FN,TP,total,fn_rate
+T1081_Credentials_In_Files,14,6,20,0.7
+T1078_Valid_Accounts,7407,7593,15000,0.4938
+T1166_Seuid_and_Setgid,1977,13023,15000,0.1318
+T1168_Local_Job_Scheduling,5,44,49,0.10204081632653061
+T1169_Sudo,2,23,25,0.08
+T1016_System_Network_Configuration_Discovery,2,44,46,0.043478260869565216
+T1108_Redundant_Access,2,56,58,0.034482758620689655
+T1107_File_Deletion,9,794,803,0.0112079701120797
+T1021_Remote_Services,2,208,210,0.009523809523809525
+T1087_Account_Discovery,8,2693,2701,0.002961865975564606
+T1043_Commonly_Used_Port,0,15000,15000,0.0
+T1068_Exploitation_for_Privilege_Escalation,0,4,4,0.0
+T1070_Indicator_Removal_on_Host,0,14,14,0.0
+T1156_bash_profile_and_bashrc,0,90,90,0.0
+T1219_Remote_Access_Tools,0,2,2,0.0

@@ -1,0 +1,30 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789229184.787866 3466282 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+======================================================================
+Dataset=camlds  Model=mlp
+======================================================================
+[ingestion] Loaded CAM-LDS: 90,805 rows from ../data/dataset1_features.csv
+[ingestion]   Features available: 20/20
+[ingestion]   Benign: 41,783  Attack: 49,022 (54.0% attack)
+[pipeline] Using 20 features (policy='full')
+[train_eval] mlp repeat 1/15: F1=0.8434 AUROC=0.9245 FPR=0.1188
+[train_eval] mlp repeat 2/15: F1=0.8413 AUROC=0.9258 FPR=0.2523
+[train_eval] mlp repeat 3/15: F1=0.8432 AUROC=0.9364 FPR=0.2503
+[train_eval] mlp repeat 4/15: F1=0.8433 AUROC=0.9305 FPR=0.0673
+[train_eval] mlp repeat 5/15: F1=0.8626 AUROC=0.9289 FPR=0.0088
+[train_eval] mlp repeat 6/15: F1=0.7774 AUROC=0.9061 FPR=0.3297
+[train_eval] mlp repeat 7/15: F1=0.7805 AUROC=0.9316 FPR=0.4514
+[train_eval] mlp repeat 8/15: F1=0.8672 AUROC=0.9264 FPR=0.0145
+[train_eval] mlp repeat 9/15: F1=0.8729 AUROC=0.9304 FPR=0.0197
+[train_eval] mlp repeat 10/15: F1=0.7933 AUROC=0.9263 FPR=0.2981
+[train_eval] mlp repeat 11/15: F1=0.8607 AUROC=0.9296 FPR=0.0758
+[train_eval] mlp repeat 12/15: F1=0.8686 AUROC=0.9486 FPR=0.0131
+[train_eval] mlp repeat 13/15: F1=0.8518 AUROC=0.9419 FPR=0.2335
+[train_eval] mlp repeat 14/15: F1=0.8752 AUROC=0.9422 FPR=0.0185
+[train_eval] mlp repeat 15/15: F1=0.8106 AUROC=0.9326 FPR=0.0883
+
+[SUMMARY] CAM-LDS / mlp: F1=0.8395+/-0.0333  AUROC=0.9308+/-0.0097  Precision=0.8802  Recall=0.8124  FPR=0.1493
+
+CAM-LDS / mlp: F1=0.8395+/-0.0333  AUROC=0.9308+/-0.0097  Precision=0.8802  Recall=0.8124  FPR=0.1493

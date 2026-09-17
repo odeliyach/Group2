@@ -1,0 +1,54 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789216027.196798 3204344 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+=== xgb / casino: production vs. candidate, 15-repeat protocol (matches headline methodology) ===
+Candidate overrides (delta from production): {'learning_rate': 0.1}
+
+Running PRODUCTION config (hp_overrides=None -> current config.py values)...
+[ingestion] Loaded CasinoLimit: 91,692 rows from ../data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+[train_eval] xgb repeat 1/15: F1=0.9851 AUROC=0.9946 FPR=0.0027
+[train_eval] xgb repeat 2/15: F1=0.9905 AUROC=0.9942 FPR=0.0029
+[train_eval] xgb repeat 3/15: F1=0.9903 AUROC=0.9938 FPR=0.0030
+[train_eval] xgb repeat 4/15: F1=0.8907 AUROC=0.9946 FPR=0.0027
+[train_eval] xgb repeat 5/15: F1=0.9835 AUROC=0.9986 FPR=0.0031
+[train_eval] xgb repeat 6/15: F1=0.9313 AUROC=0.9944 FPR=0.0029
+[train_eval] xgb repeat 7/15: F1=0.7583 AUROC=0.9982 FPR=0.0028
+[train_eval] xgb repeat 8/15: F1=0.9906 AUROC=0.9944 FPR=0.0031
+[train_eval] xgb repeat 9/15: F1=0.9674 AUROC=0.9948 FPR=0.0029
+[train_eval] xgb repeat 10/15: F1=0.9695 AUROC=0.9939 FPR=0.0031
+[train_eval] xgb repeat 11/15: F1=0.6918 AUROC=0.9942 FPR=0.0025
+[train_eval] xgb repeat 12/15: F1=0.9623 AUROC=0.9941 FPR=0.0030
+[train_eval] xgb repeat 13/15: F1=0.7213 AUROC=0.9941 FPR=0.0025
+[train_eval] xgb repeat 14/15: F1=0.9867 AUROC=0.9942 FPR=0.0028
+[train_eval] xgb repeat 15/15: F1=0.9590 AUROC=0.9946 FPR=0.0027
+  F1=0.9186±0.1050  AUROC=0.9948±0.0015
+Running CANDIDATE config...
+[ingestion] Loaded CasinoLimit: 91,692 rows from ../data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+[train_eval] xgb repeat 1/15: F1=0.9871 AUROC=0.9945 FPR=0.0027
+[train_eval] xgb repeat 2/15: F1=0.9901 AUROC=0.9942 FPR=0.0029
+[train_eval] xgb repeat 3/15: F1=0.9905 AUROC=0.9939 FPR=0.0031
+[train_eval] xgb repeat 4/15: F1=0.8933 AUROC=0.9944 FPR=0.0027
+[train_eval] xgb repeat 5/15: F1=0.9839 AUROC=0.9986 FPR=0.0029
+[train_eval] xgb repeat 6/15: F1=0.9313 AUROC=0.9944 FPR=0.0030
+[train_eval] xgb repeat 7/15: F1=0.7584 AUROC=0.9981 FPR=0.0028
+[train_eval] xgb repeat 8/15: F1=0.9906 AUROC=0.9944 FPR=0.0031
+[train_eval] xgb repeat 9/15: F1=0.9671 AUROC=0.9949 FPR=0.0031
+[train_eval] xgb repeat 10/15: F1=0.9695 AUROC=0.9939 FPR=0.0031
+[train_eval] xgb repeat 11/15: F1=0.6917 AUROC=0.9940 FPR=0.0025
+[train_eval] xgb repeat 12/15: F1=0.9622 AUROC=0.9979 FPR=0.0030
+[train_eval] xgb repeat 13/15: F1=0.8767 AUROC=0.9941 FPR=0.0025
+[train_eval] xgb repeat 14/15: F1=0.9866 AUROC=0.9947 FPR=0.0028
+[train_eval] xgb repeat 15/15: F1=0.9470 AUROC=0.9981 FPR=0.0026
+  F1=0.9284±0.0906  AUROC=0.9953±0.0018
+
+Delta F1: +0.0098  (signal/noise ratio: 0.07)
+VERDICT: NO REAL DIFFERENCE -- delta is within noise, keep production config as-is, cite this verification in the report instead of leaving it unresolved
+
+Saved: results/current/hyperparameter_verification/casino_xgb_verdict.csv

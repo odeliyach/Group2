@@ -1,0 +1,48 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789193366.416161 3302694 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[ingestion] Loaded CAM-LDS: 90,805 rows from ../data/dataset1_features.csv
+[ingestion]   Features available: 20/20
+[ingestion]   Benign: 41,783  Attack: 49,022 (54.0% attack)
+=== camlds: CNN (production, unmodified) ===
+  repeat 0: F1=0.8369 AUROC=0.8580 FPR=0.1115
+  repeat 1: F1=0.8554 AUROC=0.8000 FPR=0.0345
+  repeat 2: F1=0.7869 AUROC=0.8271 FPR=0.0222
+  repeat 3: F1=0.8315 AUROC=0.8698 FPR=0.0195
+  repeat 4: F1=0.8319 AUROC=0.8442 FPR=0.2379
+  repeat 5: F1=0.7900 AUROC=0.8780 FPR=0.0460
+  repeat 6: F1=0.7233 AUROC=0.9220 FPR=0.0442
+  repeat 7: F1=0.8257 AUROC=0.8604 FPR=0.0452
+  repeat 8: F1=0.6820 AUROC=0.7861 FPR=0.0480
+  repeat 9: F1=0.7672 AUROC=0.8528 FPR=0.3730
+  repeat 10: F1=0.7951 AUROC=0.8619 FPR=0.0202
+  repeat 11: F1=0.8295 AUROC=0.8771 FPR=0.0616
+  repeat 12: F1=0.8249 AUROC=0.7102 FPR=0.0598
+  repeat 13: F1=0.8056 AUROC=0.8551 FPR=0.0512
+  repeat 14: F1=0.7147 AUROC=0.8523 FPR=0.5105
+
+=== camlds: MLP (BatchNorm + Dropout, M2 reviewer spec) ===
+  repeat 0: F1=0.8295 AUROC=0.9242 FPR=0.1062
+  repeat 1: F1=0.8660 AUROC=0.9127 FPR=0.0198
+  repeat 2: F1=0.7668 AUROC=0.9098 FPR=0.4999
+  repeat 3: F1=0.8576 AUROC=0.8880 FPR=0.0172
+  repeat 4: F1=0.8387 AUROC=0.9130 FPR=0.0672
+  repeat 5: F1=0.7605 AUROC=0.8991 FPR=0.5351
+  repeat 6: F1=0.7948 AUROC=0.9298 FPR=0.2733
+  repeat 7: F1=0.8633 AUROC=0.9220 FPR=0.0181
+  repeat 8: F1=0.8478 AUROC=0.9162 FPR=0.0732
+  repeat 9: F1=0.7830 AUROC=0.9122 FPR=0.2875
+  repeat 10: F1=0.8499 AUROC=0.9226 FPR=0.0745
+  repeat 11: F1=0.8638 AUROC=0.9374 FPR=0.0121
+  repeat 12: F1=0.7762 AUROC=0.9265 FPR=0.3271
+  repeat 13: F1=0.8724 AUROC=0.9393 FPR=0.0241
+  repeat 14: F1=0.8024 AUROC=0.9264 FPR=0.2275
+
+=== camlds: SUMMARY ===
+CNN: F1=0.7934±0.0510  AUROC=0.8437±0.0489
+MLP: F1=0.8248±0.0400  AUROC=0.9186±0.0136
+
+Verdict: MLP performs comparably or better -- supports the reviewer's hypothesis that spatial-locality assumptions in the CNN aren't earning their keep here
+
+Saved: results/current/cnn_vs_mlp/

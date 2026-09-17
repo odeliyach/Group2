@@ -88,9 +88,39 @@ CNN_PARAMS = {
     "random_state": 42,
 }
 
+MLP_PARAMS = {
+    # Added per M2 reviewer point 2: "if process execution traces in
+    # CasinoLimit lack sequential depth (98.2% single-event processes),
+    # pivot from the 1D-CNN to a deep MLP with Batch Normalization and
+    # Dropout." Tested head-to-head against the production CNN under the
+    # identical protocol (compare_cnn_vs_mlp.py, 15-repeat, Casino):
+    #   CNN: F1=0.635+/-0.264  AUROC=0.793+/-0.255
+    #   MLP: F1=0.862+/-0.089  AUROC=0.993+/-0.019
+    # MLP wins on both mean AND stability by a wide margin -- adopted as
+    # the Deep Learning paradigm representative for CasinoLimit. CAM-LDS
+    # keeps the CNN (it has real sequence depth, 10.87 events/process
+    # avg, unlike Casino -- see M2 Ch6.1's original justification, which
+    # still applies there and was not re-tested).
+    "dense_units": [256, 128, 64, 32],
+    "dropout": 0.3,
+    "learning_rate": 1e-3,
+    "batch_size": 512,
+    "epochs": 50,
+    "early_stopping_patience": 5,
+    "class_weight_strategy": "balanced",
+    "random_state": 42,
+}
+
 IFOREST_PARAMS = {
-    "n_estimators": 200,
-    "max_samples": 256,
+    # n_estimators/max_samples raised from 200/256 to 400/512 for CAM-LDS,
+    # verified via verify_hyperparameter_candidate.py under the full
+    # 15-repeat protocol: F1 0.261->0.306 (+0.045, signal/noise=1.41, a
+    # genuine improvement, not sweep noise). Casino's own sweep found no
+    # defensible candidate (every config std>0.2, too noisy to act on) --
+    # this change applies dataset-wide since IFOREST_PARAMS isn't currently
+    # split per-dataset, but the evidence for it is CAM-LDS-specific.
+    "n_estimators": 400,
+    "max_samples": 512,
     "contamination": "auto",   # note: only affects clf.predict()'s own
                                 # -1/+1 cutoff, which train_eval.py no
                                 # longer uses -- the actual decision
@@ -121,6 +151,8 @@ SENSITIVITY_GRIDS = {
     "xgb": {"max_depth": [3, 6, 9],
             "learning_rate": [0.01, 0.05, 0.1, 0.2]},
     "cnn": {"dropout": [0.1, 0.3, 0.5],
+            "learning_rate": [1e-2, 1e-3, 1e-4]},
+    "mlp": {"dropout": [0.1, 0.3, 0.5],
             "learning_rate": [1e-2, 1e-3, 1e-4]},
     "iforest": {"n_estimators": [50, 100, 200, 400],
                 "max_samples": [64, 128, 256, 512]},

@@ -1,0 +1,20 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789216961.439169 3254479 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[ingestion] Loaded CAM-LDS: 90,805 rows from ../data/dataset1_features.csv
+[ingestion]   Features available: 20/20
+[ingestion]   Benign: 41,783  Attack: 49,022 (54.0% attack)
+[ingestion] Loaded CasinoLimit: 91,692 rows from ../data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+CAM-LDS native features: 20, Casino native: 17
+Baseline (current approach): 17-feature intersection
+[baseline] CAM-LDS->Casino: AUROC=0.0062 F1_recal=0.0083
+[candidate] CAM-LDS->Casino: AUROC=0.0062 F1_recal=0.0090
+
+Delta AUROC: -0.0000  Delta F1(recal): +0.0007
+VERDICT: NO MEANINGFUL DIFFERENCE -- the model doesn't exploit the missingness signal; the 17-feature intersection is not costing real transfer performance
+
+Saved: results/current/unified_schema_missingness/

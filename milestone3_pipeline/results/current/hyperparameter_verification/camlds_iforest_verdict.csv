@@ -1,0 +1,2 @@
+model,dataset,production_f1_mean,production_f1_std,candidate_f1_mean,candidate_f1_std,delta_f1,signal_to_noise,verdict
+iforest,camlds,0.26095784536519573,0.01872937238459088,0.3055757525092756,0.025570707720583435,0.04461790714407987,1.407672727473371,"CANDIDATE GENUINELY BETTER -- consider adopting, then re-run downstream pipeline (cross-dataset, cascade, error analysis) to match"

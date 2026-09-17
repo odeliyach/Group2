@@ -1,0 +1,49 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789109292.870212 2159081 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[ingestion] Loaded CasinoLimit: 91,692 rows from data/casino_process_level_ds.csv
+[ingestion]   Excluded techniques ['T1003', 'T1078']: 0 rows removed, 91,692 remain
+[ingestion]   Features available: 17/20  (missing: ['is_suid_exec', 'ephemeral_privileged', 'parent_child_rarity'])
+[ingestion]   Benign: 75,999  Attack: 15,693 (17.1% attack)
+=== casino: CNN (production, unmodified) ===
+  repeat 0: F1=0.2549 AUROC=0.6452 FPR=0.9799
+  repeat 1: F1=0.2401 AUROC=0.6065 FPR=0.9800
+  repeat 2: F1=0.8051 AUROC=0.9925 FPR=0.0017
+  repeat 3: F1=0.7610 AUROC=0.9857 FPR=0.0014
+  repeat 4: F1=0.7963 AUROC=0.9240 FPR=0.0017
+  repeat 5: F1=0.8306 AUROC=0.9320 FPR=0.0034
+  repeat 6: F1=0.7897 AUROC=0.9854 FPR=0.0026
+  repeat 7: F1=0.8861 AUROC=0.9769 FPR=0.0161
+  repeat 8: F1=0.2667 AUROC=0.9471 FPR=0.9799
+  repeat 9: F1=0.2270 AUROC=0.7238 FPR=0.9795
+  repeat 10: F1=0.7214 AUROC=0.5358 FPR=0.0028
+  repeat 11: F1=0.4949 AUROC=0.9920 FPR=0.0014
+  repeat 12: F1=0.9159 AUROC=0.8888 FPR=0.0034
+  repeat 13: F1=0.6317 AUROC=0.6890 FPR=0.0022
+  repeat 14: F1=0.9004 AUROC=0.0765 FPR=0.0027
+
+=== casino: MLP (BatchNorm + Dropout, M2 reviewer spec) ===
+  repeat 0: F1=0.9106 AUROC=0.9984 FPR=0.0028
+  repeat 1: F1=0.7816 AUROC=0.9980 FPR=0.0016
+  repeat 2: F1=0.9639 AUROC=0.9987 FPR=0.0033
+  repeat 3: F1=0.8325 AUROC=0.9987 FPR=0.0020
+  repeat 4: F1=0.8393 AUROC=0.9232 FPR=0.0019
+  repeat 5: F1=0.9573 AUROC=0.9987 FPR=0.0025
+  repeat 6: F1=0.6898 AUROC=0.9974 FPR=0.0012
+  repeat 7: F1=0.8617 AUROC=0.9978 FPR=0.0015
+  repeat 8: F1=0.8080 AUROC=0.9984 FPR=0.0012
+  repeat 9: F1=0.8114 AUROC=0.9982 FPR=0.0018
+  repeat 10: F1=0.7460 AUROC=0.9983 FPR=0.0018
+  repeat 11: F1=0.9876 AUROC=0.9979 FPR=0.0032
+  repeat 12: F1=0.9512 AUROC=0.9977 FPR=0.0028
+  repeat 13: F1=0.8405 AUROC=0.9985 FPR=0.0016
+  repeat 14: F1=0.9530 AUROC=0.9986 FPR=0.0025
+
+=== casino: SUMMARY ===
+CNN: F1=0.6348±0.2639  AUROC=0.7934±0.2548
+MLP: F1=0.8623±0.0889  AUROC=0.9932±0.0194
+
+Verdict: MLP performs comparably or better -- supports the reviewer's hypothesis that spatial-locality assumptions in the CNN aren't earning their keep here
+
+Saved: milestone3_pipeline/results/current/cnn_vs_mlp/

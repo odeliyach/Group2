@@ -531,27 +531,154 @@ comparison in the report.
 
 ---
 
-## 12. Open items — not yet done
+## 12. Open items — status update
 
-- **XGBoost sensitivity sweep incomplete** — timed out at 5hrs on both
-  datasets, only partial grid coverage. Options: raise time budget further,
-  or reduce `SENSITIVITY_GRIDS["xgb"]`'s combo count. Not blocking — RF's
-  sweep is complete and representative of the same paradigm.
-- **Sample-level error analysis** — Step 8 deliverable, not started. Needs
-  to pull actual misclassified rows from saved CV results and characterize
-  what they have in common per model.
 - **Hybrid cascade** (Isolation Forest first-pass filter → supervised
-  classifier) — Step 8 capstone requirement, not started.
-- **LLM triage layer** — Step 8 capstone requirement, not started.
-- **CAM-LDS-v2 regeneration** — scripts written (`run_camlds_v2_regen.sh`,
-  `run_milestone3_camlds_v2.sh`), not yet executed.
-- **Per-environment normalization** (z-score each dataset by its own
-  mean/std before cross-dataset training) — discussed as a partial
-  mitigation for the *scale* component of cross-dataset shift, not yet
-  implemented.
-- **Deep Autoencoder alternative to Isolation Forest** — brief allows
-  either for the unsupervised paradigm; discussed as untested alternative
-  given IsoForest's confirmed mechanistic limitation, not yet implemented.
-- **Casino de-duplication for CNN training** — discussed as a way to
-  stabilize CNN training (train on 356 unique rows with sample weights
-  instead of 91k duplicated rows), not yet implemented.
+  classifier) — **done.** `hybrid_cascade.py` / `hybrid_cascade_weighted.py`
+  implemented and validated; see `#15` for the confound-free A/B follow-ups
+  (blend formula, Stage-2 model choice) and the added FNR metric.
+
+- **Sample-level error analysis** — **done.** Per-technique FN rates,
+  benign FP rates, FN-vs-TP and FP-vs-TN feature comparisons, and pairwise
+  model agreement/disagreement counts computed for all four models on both
+  datasets (`results/current/error_analysis_results/`). Notable finding
+  worth citing: Isolation Forest misses 96.2% of `T1166_Seuid_and_Setgid`
+  and 94.3% of `T1078_Valid_Accounts` on CAM-LDS — far higher FN rates than
+  the other three models on those techniques.
+
+- **CAM-LDS regeneration** — done, under a v3 pipeline
+  (`data/v3`, `results/current/outputs_camlds_v3/`,
+  `run_scripts/run_cross_dataset_v3_recal.sh`, 15-repeat protocol). No v2
+  was ever built — the project went directly to v3.
+
+- **XGBoost sensitivity sweep** — the original 3-repeat sweep never
+  finished (5hr timeout, partial grid). Resolved differently:
+  `verify_hyperparameter_candidate.py` tested XGBoost (and RF, MLP,
+  Isolation Forest) candidates directly against production under the full
+  15-repeat headline protocol instead of finishing the sweep. Verdict: no
+  real difference for XGBoost on either dataset (CAM-LDS Δ F1=−0.030,
+  signal/noise=0.25; CasinoLimit `learning_rate=0.1`, Δ F1=+0.010,
+  signal/noise=0.07) — production config kept. Same check found one
+  genuine win (Isolation Forest, CAM-LDS, `n_estimators=400/max_samples=512`,
+  Δ F1=+0.045, signal/noise=1.41 — adopted, see `#14`); RF and MLP
+  candidates also showed no real difference on both datasets.
+
+---
+
+## 13. Deep Learning model swap: MLP for CasinoLimit
+
+**What changed:** added `MLP_PARAMS` (`src/config.py`) — a deep MLP with Batch
+Normalization and Dropout — as the Deep Learning paradigm representative for
+CasinoLimit, replacing the 1D-CNN used in the Milestone 2 report.
+
+**Why:** per M2 reviewer feedback, CasinoLimit's process traces lack the
+sequential depth a CNN/LSTM-style architecture needs (98.2% single-event
+processes). Head-to-head comparison (`compare_cnn_vs_mlp.py`, 15-repeat
+protocol, CasinoLimit):
+
+| Model | F1 | AUROC |
+| --- | --- | --- |
+| CNN | 0.635 ± 0.264 | 0.793 ± 0.255 |
+| MLP | 0.862 ± 0.089 | 0.993 ± 0.019 |
+
+MLP wins on both mean performance and stability by a wide margin.
+
+**Scope:** CasinoLimit only. CAM-LDS keeps its CNN — it has genuine sequence
+depth (10.87 events/process average vs. CasinoLimit's 1.08), so the original
+M2 Ch6.1 justification for a sequence-aware architecture still applies there
+and was not re-tested.
+
+**Related:** `src/models.py`, `src/config.py` (`SENSITIVITY_GRIDS["mlp"]`),
+`results/current/cnn_vs_mlp/`, `results/current/error_analysis_results/{camlds,casino}_mlp/`.
+
+---
+
+## 14. Isolation Forest hyperparameter retune (CAM-LDS)
+
+**What changed:** `IFOREST_PARAMS.n_estimators` 200→400 and `max_samples`
+256→512.
+
+**Why:** verified via `verify_hyperparameter_candidate.py` under the full
+15-repeat protocol on CAM-LDS: F1 improved 0.261 → 0.306 (+0.045,
+signal/noise ratio 1.41 — a genuine improvement, not sweep noise).
+
+**Scope:** applies dataset-wide, since `IFOREST_PARAMS` isn't currently split
+per-dataset — but the supporting evidence is CAM-LDS-specific. CasinoLimit's
+own sweep found no defensible candidate (every configuration tested had
+std > 0.2, too noisy to act on), so its Isolation Forest is unchanged in
+substance, just inheriting the new shared values.
+
+**Related:** `results/current/hyperparameter_verification/camlds_iforest_*`.
+
+---
+
+---
+
+## 15. Cascade design validation: confound-free A/B tests + missing FNR metric
+
+Three follow-up scripts closing gaps the report template requires but the
+original `hybrid_cascade.py` / `hybrid_cascade_weighted.py` split didn't
+cleanly answer, because those are separate scripts that each independently
+retrain XGBoost + CNN per fold — with CNN's run-to-run instability
+(FP rate observed 0.33%–98.00% across 6 runs at the same seed, per Report
+Sec. 2.1), naively comparing their numbers conflates "which design is
+better" with "which run got luckier." All three scripts below fix this by
+training Stage 1 (and, where relevant, Stage 2) **once per fold** and
+reusing those exact fitted models/predictions across every variant being
+compared, so any metric difference is attributable only to the thing
+actually being tested.
+
+**`cascade_blend_formula_ab.py` — flat 50/50 vs. distance-weighted blend**
+(single seed, 5-fold, XGBoost+CNN trained once per fold, reused for both
+blend formulas):
+
+| Dataset | flat F1 | weighted F1 | Δ |
+| --- | --- | --- | --- |
+| CAM-LDS | 0.8475 ± 0.1327 | 0.8627 ± 0.1237 | +0.0152 |
+| CasinoLimit (4/5 usable folds — fold 0 degenerate, single-class test fold) | 0.9832 ± 0.0134 | 0.9900 ± 0.0102 | +0.0068 |
+
+Distance-weighted blending (full Stage-2 weight at the band center, fading
+to zero at the edges) beats flat 50/50 on both datasets under this
+confound-free setup — confirms `hybrid_cascade_weighted.py`'s design choice
+was a genuine improvement, not an artifact of a lucky CNN run.
+
+**`cascade_stage2_model_ab.py` — CNN vs. MLP as the Stage-2 model**
+(same confound control, weighted-blend formula held fixed, Stage 1 +
+fold split shared):
+
+| Dataset | CNN F1 | MLP F1 | Δ |
+| --- | --- | --- | --- |
+| CAM-LDS | 0.8478 ± 0.1266 | 0.8355 ± 0.1353 | −0.0123 |
+| CasinoLimit (4/5 usable folds) | 0.9900 ± 0.0101 | 0.9900 ± 0.0101 | +0.0000 |
+
+Confirms Ch. 6's dataset-specific model choice is directionally correct at
+the cascade level too: CNN is (slightly) better on CAM-LDS's sequence-rich
+data, the two are indistinguishable on CasinoLimit under this single-seed
+check (contrast with the standalone 15-repeat MLP-vs-CNN comparison in
+`#13`, which is the more statistically reliable number for that dataset).
+
+**`compute_cascade_fnr.py` — adds the FNR metric the report template asks
+for** (S3.2), which the original cascade CV loop never recorded. Reuses
+`hybrid_cascade.py`'s actual `cascade_predict()` unmodified, full 15-repeat
+pooled protocol (matching every other headline number in the project, not
+a cheap exploratory sweep):
+
+| Dataset | F1 | AUROC | FPR | FNR |
+| --- | --- | --- | --- | --- |
+| CAM-LDS | 0.8524 ± 0.0278 | 0.9296 ± 0.0151 | 0.2143 ± 0.0572 | 0.1221 ± 0.0370 |
+| CasinoLimit | 0.9393 ± 0.0671 | 0.9357 ± 0.0453 | 0.1298 ± 0.0678 | 0.0747 ± 0.0829 |
+
+**`cascade_threshold_sweep.py`** also ships in this branch — sweeps the
+cascade's uncertain-band half-width (0.10–0.30, vs. the never-validated
+default of 0.20) with per-config repeats to average out CNN instability.
+⚠️ **Caveat:** its result files (`results/current/cascade_threshold_sweep/`)
+are byte-identical on `main` already — worth confirming with whoever ran it
+whether that's a prior partial merge or the script reproducing the same
+output, before citing sweep numbers as new in this entry. Left out here
+rather than guessed at.
+
+**Related files:** `src/cascade_blend_formula_ab.py`,
+`src/cascade_stage2_model_ab.py`, `src/cascade_threshold_sweep.py`,
+`src/compute_cascade_fnr.py`, `run_scripts/run_cascade_fnr.sh`,
+`results/current/cascade_blend_formula_ab/`,
+`results/current/cascade_stage2_model_ab/`, `results/current/cascade_final/`.

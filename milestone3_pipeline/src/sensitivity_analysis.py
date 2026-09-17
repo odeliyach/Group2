@@ -96,7 +96,7 @@ def _plot(df, swept_keys, dataset_key, model_key, out_dir):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--dataset", choices=["camlds", "casino"], required=True)
-    p.add_argument("--model", choices=["rf", "xgb", "cnn", "iforest"], required=True)
+    p.add_argument("--model", choices=["rf", "xgb", "cnn", "mlp", "iforest"], required=True)
     p.add_argument("--repeats", type=int, default=3)
     p.add_argument("--data-dir", default=".")
     p.add_argument("--out", default="sensitivity_results")

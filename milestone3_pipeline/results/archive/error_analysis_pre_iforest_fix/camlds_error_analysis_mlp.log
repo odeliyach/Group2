@@ -1,0 +1,219 @@
+nohup: ignoring input
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789205920.748076 2363576 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[error_analysis] dataset=camlds models=['rf', 'xgb', 'mlp', 'iforest']
+[ingestion] Loaded CAM-LDS: 90,805 rows from ../data/dataset1_features.csv
+[ingestion]   Features available: 20/20
+[ingestion]   Benign: 41,783  Attack: 49,022 (54.0% attack)
+[error_analysis] rf fold 1/5 done
+[error_analysis] rf fold 2/5 done
+[error_analysis] rf fold 3/5 done
+[error_analysis] rf fold 4/5 done
+[error_analysis] rf fold 5/5 done
+[error_analysis] xgb fold 1/5 done
+[error_analysis] xgb fold 2/5 done
+[error_analysis] xgb fold 3/5 done
+[error_analysis] xgb fold 4/5 done
+[error_analysis] xgb fold 5/5 done
+[error_analysis] mlp fold 1/5 done
+[error_analysis] mlp fold 2/5 done
+[error_analysis] mlp fold 3/5 done
+[error_analysis] mlp fold 4/5 done
+[error_analysis] mlp fold 5/5 done
+[error_analysis] iforest fold 1/5 done
+[error_analysis] iforest fold 2/5 done
+[error_analysis] iforest fold 3/5 done
+[error_analysis] iforest fold 4/5 done
+[error_analysis] iforest fold 5/5 done
+[error_analysis] Saved full row-level predictions: results/current/error_analysis_results/camlds_mlp/camlds_error_rows.csv
+
+=================================================================
+rf
+=================================================================
+FN rate by technique (worst first):
+errtype_rf                                      FN     TP  total   fn_rate
+technique                                                                 
+T1081_Credentials_In_Files                      14      6     20  0.700000
+T1078_Valid_Accounts                          7180   7820  15000  0.478667
+T1168_Local_Job_Scheduling                      17     32     49  0.346939
+T1068_Exploitation_for_Privilege_Escalation      1      3      4  0.250000
+T1166_Seuid_and_Setgid                        2026  12974  15000  0.135067
+T1156_bash_profile_and_bashrc                   10     80     90  0.111111
+T1169_Sudo                                       2     23     25  0.080000
+T1070_Indicator_Removal_on_Host                  1     13     14  0.071429
+T1108_Redundant_Access                           4     54     58  0.068966
+T1016_System_Network_Configuration_Discovery     2     44     46  0.043478
+T1107_File_Deletion                             28    775    803  0.034869
+T1021_Remote_Services                            5    205    210  0.023810
+T1087_Account_Discovery                         10   2691   2701  0.003702
+T1043_Commonly_Used_Port                         8  14992  15000  0.000533
+T1219_Remote_Access_Tools                        0      2      2  0.000000
+
+Benign FP rate: 3610/41783 (8.64%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+               feature   FN_mean   TP_mean  FN_over_TP_ratio
+9   auid_euid_mismatch  0.060163  0.029335          2.050923
+16       network_count  0.008917  2.406884          0.003705
+13       priv_op_count  0.010421  0.472277          0.022066
+15   file_access_count  0.032982  0.659087          0.050042
+7   max_uid_euid_delta  0.253438  2.946946          0.086000
+
+Top 5 features most different between false-positive and true-negative benign rows:
+                 feature     FP_mean       TN_mean  cohens_d
+14            exec_count    1.409418      2.536295 -0.827129
+12     failed_call_count    4.152909      6.273204 -0.668549
+2             seq_length    5.192244      7.534959 -0.570036
+10  ephemeral_privileged    0.997507      0.883556  0.496436
+0       lifetime_seconds  691.219467  49567.455782 -0.491109
+
+=================================================================
+xgb
+=================================================================
+FN rate by technique (worst first):
+errtype_xgb                                     FN     TP  total   fn_rate
+technique                                                                 
+T1081_Credentials_In_Files                      14      6     20  0.700000
+T1078_Valid_Accounts                          7407   7593  15000  0.493800
+T1166_Seuid_and_Setgid                        1977  13023  15000  0.131800
+T1168_Local_Job_Scheduling                       5     44     49  0.102041
+T1169_Sudo                                       2     23     25  0.080000
+T1016_System_Network_Configuration_Discovery     2     44     46  0.043478
+T1108_Redundant_Access                           2     56     58  0.034483
+T1107_File_Deletion                              9    794    803  0.011208
+T1021_Remote_Services                            2    208    210  0.009524
+T1087_Account_Discovery                          8   2693   2701  0.002962
+T1043_Commonly_Used_Port                         0  15000  15000  0.000000
+T1068_Exploitation_for_Privilege_Escalation      0      4      4  0.000000
+T1070_Indicator_Removal_on_Host                  0     14     14  0.000000
+T1156_bash_profile_and_bashrc                    0     90     90  0.000000
+T1219_Remote_Access_Tools                        0      2      2  0.000000
+
+Benign FP rate: 4204/41783 (10.06%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+               feature   FN_mean   TP_mean  FN_over_TP_ratio
+17  shell_from_service  0.000000  0.000303          0.000000
+16       network_count  0.000000  2.416275          0.000000
+13       priv_op_count  0.000742  0.475981          0.001560
+15   file_access_count  0.006152  0.667374          0.009218
+9   auid_euid_mismatch  0.058337  0.029676          1.965779
+
+Top 5 features most different between false-positive and true-negative benign rows:
+                 feature     FP_mean       TN_mean  cohens_d
+10  ephemeral_privileged    0.998573      0.881636  0.508463
+0       lifetime_seconds  162.395786  50399.187843 -0.504161
+19   parent_child_rarity    0.979133      0.931787  0.438216
+14            exec_count    1.893435      2.499960 -0.400986
+12     failed_call_count    5.066603      6.204503 -0.319026
+
+=================================================================
+mlp
+=================================================================
+FN rate by technique (worst first):
+errtype_mlp                                     FN     TP  total   fn_rate
+technique                                                                 
+T1156_bash_profile_and_bashrc                   58     32     90  0.644444
+T1078_Valid_Accounts                          7483   7517  15000  0.498867
+T1081_Credentials_In_Files                       8     12     20  0.400000
+T1068_Exploitation_for_Privilege_Escalation      1      3      4  0.250000
+T1168_Local_Job_Scheduling                       8     41     49  0.163265
+T1166_Seuid_and_Setgid                        1871  13129  15000  0.124733
+T1016_System_Network_Configuration_Discovery     2     44     46  0.043478
+T1169_Sudo                                       1     24     25  0.040000
+T1021_Remote_Services                            3    207    210  0.014286
+T1107_File_Deletion                              9    794    803  0.011208
+T1087_Account_Discovery                          9   2692   2701  0.003332
+T1043_Commonly_Used_Port                         2  14998  15000  0.000133
+T1070_Indicator_Removal_on_Host                  0     14     14  0.000000
+T1108_Redundant_Access                           0     58     58  0.000000
+T1219_Remote_Access_Tools                        0      2      2  0.000000
+
+Benign FP rate: 4997/41783 (11.96%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+               feature   FN_mean   TP_mean  FN_over_TP_ratio
+8         is_suid_exec  0.000000  0.004448          0.000000
+13       priv_op_count  0.000000  0.476483          0.000000
+16       network_count  0.000212  2.417873          0.000087
+15   file_access_count  0.017874  0.665024          0.026877
+7   max_uid_euid_delta  0.211528  2.966967          0.071294
+
+Top 5 features most different between false-positive and true-negative benign rows:
+                 feature     FP_mean       TN_mean  cohens_d
+10  ephemeral_privileged    0.997599      0.879248  0.507962
+0       lifetime_seconds  816.446676  51393.302012 -0.499428
+19   parent_child_rarity    0.976282      0.931153  0.413109
+9     auid_euid_mismatch    0.078847      0.008835  0.347034
+3        unique_syscalls    3.033820      2.949954  0.247073
+
+=================================================================
+iforest
+=================================================================
+FN rate by technique (worst first):
+errtype_iforest                                  FN    TP  total   fn_rate
+technique                                                                 
+T1081_Credentials_In_Files                       20     0     20  1.000000
+T1166_Seuid_and_Setgid                        14456   544  15000  0.963733
+T1078_Valid_Accounts                          14217   783  15000  0.947800
+T1043_Commonly_Used_Port                      14000  1000  15000  0.933333
+T1068_Exploitation_for_Privilege_Escalation       2     2      4  0.500000
+T1168_Local_Job_Scheduling                       12    37     49  0.244898
+T1107_File_Deletion                              36   767    803  0.044832
+T1087_Account_Discovery                           8  2693   2701  0.002962
+T1016_System_Network_Configuration_Discovery      0    46     46  0.000000
+T1021_Remote_Services                             0   210    210  0.000000
+T1070_Indicator_Removal_on_Host                   0    14     14  0.000000
+T1108_Redundant_Access                            0    58     58  0.000000
+T1156_bash_profile_and_bashrc                     0    90     90  0.000000
+T1169_Sudo                                        0    25     25  0.000000
+T1219_Remote_Access_Tools                         0     2      2  0.000000
+
+Benign FP rate: 2047/41783 (4.90%)
+
+Top 5 features most different between missed (FN) and caught (TP) attacks:
+                 feature      FN_mean        TP_mean  FN_over_TP_ratio
+1      events_per_second  4462.030138    1021.498406          4.368122
+10  ephemeral_privileged     0.999930       0.431191          2.318994
+0       lifetime_seconds   181.549482  395514.290687          0.000459
+15     file_access_count     0.003415       4.199649          0.000813
+13         priv_op_count     0.007017       2.958539          0.002372
+
+Top 5 features most different between false-positive and true-negative benign rows:
+                 feature        FP_mean       TN_mean  cohens_d
+10  ephemeral_privileged       0.032731      0.937739 -4.264806
+0       lifetime_seconds  396964.215638  27230.925167  3.137951
+1      events_per_second     320.554579   5956.679964 -1.671609
+3        unique_syscalls       3.657548      2.924049  1.041239
+19   parent_child_rarity       0.992742      0.933656  0.561395
+
+=================================================================
+Generating charts
+=================================================================
+[error_analysis] Saved: results/current/error_analysis_results/camlds_mlp/camlds_technique_fn_rates.png
+[error_analysis] Saved: results/current/error_analysis_results/camlds_mlp/camlds_fp_feature_comparison.png
+
+=================================================================
+Pairwise model comparisons
+=================================================================
+
+rf wrong & xgb right: 712 rows
+rf right & xgb wrong: 1426 rows
+
+rf wrong & mlp right: 1359 rows
+rf right & mlp wrong: 2893 rows
+
+rf wrong & iforest right: 3751 rows
+rf right & iforest wrong: 35631 rows
+
+xgb wrong & mlp right: 1364 rows
+xgb right & mlp wrong: 2184 rows
+
+xgb wrong & iforest right: 4231 rows
+xgb right & iforest wrong: 35397 rows
+
+mlp wrong & iforest right: 5130 rows
+mlp right & iforest wrong: 35476 rows
+
+[error_analysis] Done. All outputs in results/current/error_analysis_results/camlds_mlp/

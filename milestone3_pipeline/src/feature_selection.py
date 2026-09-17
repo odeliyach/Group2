@@ -27,8 +27,26 @@ droppable, consistent with that finding.
 # CasinoLimit, see M2 Table 5/6, so this map is dataset-specific evidence
 # rather than a hardcoded universal list).
 ABLATION_DROPPABLE = {
-    "camlds": [],   # fill in from validation_output/cam_lds/feature_ablation.csv
-    "casino": [],   # fill in from validation_output/casino/feature_ablation.csv
+    # CAM-LDS: M2's feature_list_optimization.txt showed the aggressive
+    # reduced set COSTS real detection power (F1 -0.1875, AUROC -0.2304)
+    # -- consistent with Ch3.2's finding that features carry independent
+    # marginal signal here. Keep the full set; do not reduce.
+    "camlds": [],
+    # CasinoLimit: M2's ablation suggested this 16-feature drop (down to
+    # just file_access_count) matched the full 17-feature set. Re-tested
+    # under M3's leak-free protocol (run_milestone3_casino_reduced.sh) and
+    # it collapses badly: F1 0.919->0.137, AUROC->0.600, FPR->0.464. The
+    # M2 result was very likely an artifact of Casino's severe duplication
+    # (356 unique feature-vector groups), not a genuine finding. This
+    # policy is kept here for reproducibility of that test, but "full" is
+    # what production actually uses -- do not switch to "reduced".
+    "casino": [
+        "lifetime_seconds", "events_per_second", "seq_length", "unique_syscalls",
+        "uid_is_root", "uid_changed", "euid_root", "max_uid_euid_delta",
+        "auid_euid_mismatch", "failed_call_rate", "failed_call_count",
+        "priv_op_count", "exec_count", "network_count", "shell_from_service",
+        "sensitive_path_access",
+    ],
 }
 
 

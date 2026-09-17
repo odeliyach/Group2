@@ -1,0 +1,75 @@
+{
+  "dataset": "casino",
+  "n_rows": 91692,
+  "n_features": 17,
+  "feature_columns": [
+    "lifetime_seconds",
+    "events_per_second",
+    "seq_length",
+    "unique_syscalls",
+    "uid_is_root",
+    "uid_changed",
+    "euid_root",
+    "max_uid_euid_delta",
+    "auid_euid_mismatch",
+    "failed_call_rate",
+    "failed_call_count",
+    "priv_op_count",
+    "exec_count",
+    "file_access_count",
+    "network_count",
+    "shell_from_service",
+    "sensitive_path_access"
+  ],
+  "rf_params": {
+    "n_estimators": 300,
+    "max_depth": 12,
+    "min_samples_leaf": 5,
+    "min_samples_split": 10,
+    "max_features": "sqrt",
+    "class_weight": "balanced",
+    "n_jobs": -1,
+    "random_state": 42
+  },
+  "xgb_params": {
+    "n_estimators": 400,
+    "max_depth": 6,
+    "learning_rate": 0.05,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 5,
+    "reg_lambda": 1.0,
+    "reg_alpha": 0.1,
+    "eval_metric": "aucpr",
+    "tree_method": "hist",
+    "random_state": 42,
+    "scale_pos_weight": 4.842859873829096
+  },
+  "iforest_params": {
+    "n_estimators": 200,
+    "max_samples": 256,
+    "contamination": "auto",
+    "max_features": 1.0,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "cnn_params": {
+    "conv_filters": [
+      64,
+      32
+    ],
+    "kernel_size": 3,
+    "dense_units": [
+      32
+    ],
+    "dropout": 0.3,
+    "learning_rate": 0.01,
+    "batch_size": 512,
+    "epochs": 15,
+    "early_stopping_patience": 3,
+    "class_weight_strategy": "balanced",
+    "random_state": 42
+  },
+  "max_fpr_operating_point": 0.05,
+  "note": "Fit on the FULL dataset for archival/deployment -- NOT the same object as any individual cross-validation fold's model."
+}
