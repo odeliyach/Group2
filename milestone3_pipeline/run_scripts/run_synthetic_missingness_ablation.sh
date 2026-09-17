@@ -2,11 +2,11 @@
 #SBATCH --job-name=milestone3-synth-missingness
 #SBATCH --output=logs/m3_synth_missing_%A_%a.out
 #SBATCH --error=logs/m3_synth_missing_%A_%a.err
-#SBATCH --array=0-1
+#SBATCH --array=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
-#SBATCH --time=01:30:00
+#SBATCH --time=23:00:00
 #SBATCH --partition=studentkillable
 #SBATCH --open-mode=truncate
 #
