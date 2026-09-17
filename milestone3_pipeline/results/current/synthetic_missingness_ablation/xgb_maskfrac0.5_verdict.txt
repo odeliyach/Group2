@@ -1,0 +1,3 @@
+A(full)=0.8502  B(masked,no flag)=0.8571  C(masked,with flag)=0.8548
+Gap recovered by flag: 33.7%
+VERDICT: INDICATOR DOES NOT HELP -- C ~= B even with genuine row-level variance. The earlier cross-dataset null result was NOT merely a variance artifact of that experiment's design; the availability signal itself appears to carry no usable information for this model/feature set.
