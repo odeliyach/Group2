@@ -2,11 +2,11 @@
 #SBATCH --job-name=milestone3-opcurve-all
 #SBATCH --output=logs/m3_opcurve_all_%A_%a.out
 #SBATCH --error=logs/m3_opcurve_all_%A_%a.err
-#SBATCH --array=0-7%4
+#SBATCH --array=0,1,2,5,6
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=12G
-#SBATCH --time=02:00:00
+#SBATCH --time=23:00:00
 #SBATCH --partition=studentkillable
 #SBATCH --open-mode=truncate
 #
