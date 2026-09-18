@@ -1,6 +1,6 @@
 {
   "dataset": "camlds",
-  "n_rows": 90778,
+  "n_rows": 90805,
   "n_features": 20,
   "feature_columns": [
     "lifetime_seconds",
@@ -46,7 +46,7 @@
     "eval_metric": "aucpr",
     "tree_method": "hist",
     "random_state": 42,
-    "scale_pos_weight": 2.4891801514394434
+    "scale_pos_weight": 0.8523316062176166
   },
   "iforest_params": {
     "n_estimators": 400,
