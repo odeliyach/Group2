@@ -1,0 +1,193 @@
+import os
+"""Milestone 3 -- Step 8 capstone: the LLM arbitration client.
+
+Deterministic decoding (temperature 0, fixed seed), with schema-guided decoding
+where the backend supports it, backed by JSON-schema validation and a single
+repair retry. On still-invalid output: parse_status="parse_error".
+Two backends: "vllm" (cluster GPU, lazy-imported) and "ollama" (local HTTP fallback).
+Tests subclass LLMClient and override _generate -- no network or GPU needed.
+"""
+
+import json
+
+from jsonschema import validate, ValidationError
+
+from config import FULL_FEATURE_LIST, LLM_TRIAGE
+from llm_triage_prompts import (SYSTEM_PROMPT, COT_RUBRIC, SCHEMA_INSTRUCTION,
+                                FEWSHOT_EXAMPLES, ARBITRATION_SCHEMA_V1)
+
+_EMPTY = {"verdict": None, "confidence": None, "rationale_steps": [],
+          "key_features": [], "agrees_with": None}
+
+
+def build_messages(context_str):
+    """Role-tagged messages for the arbitration call.
+
+    SYSTEM_PROMPT is delivered as an actual system-role turn rather than
+    concatenated into one flat string: both backbones are -Instruct
+    checkpoints, fine-tuned to expect role-separated input, and collapsing
+    everything into a single blob (or, on vLLM, skipping the chat template
+    entirely via a raw completion call) means the model isn't being prompted
+    the way it was tuned to expect.
+    """
+    user_content = "\n\n".join([
+        COT_RUBRIC, SCHEMA_INSTRUCTION, FEWSHOT_EXAMPLES,
+        "--- RECORD TO CLASSIFY ---", context_str,
+    ])
+    return [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user_content},
+    ]
+
+
+def _extract_json(text):
+    start, end = text.find("{"), text.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        raise ValueError("no JSON object found")
+    return json.loads(text[start:end + 1])
+
+
+def _validate_semantics(obj):
+    validate(obj, ARBITRATION_SCHEMA_V1)  # raises ValidationError
+    bad = [f for f in obj["key_features"] if f not in FULL_FEATURE_LIST]
+    if bad:
+        raise ValidationError(f"unknown key_features: {bad}")
+
+
+def _try_parse(text):
+    obj = _extract_json(text)          # ValueError / json.JSONDecodeError
+    _validate_semantics(obj)           # ValidationError
+    return obj
+
+
+class LLMClient:
+    def __init__(self, model_id=None, backend=None, max_new_tokens=None,
+                 temperature=None, seed=None, cpu_offload_gb=None, dtype=None):
+        c = LLM_TRIAGE
+        self.model_id = model_id or c["model_id"]
+        self.backend = backend or c["backend"]
+        self.max_new_tokens = max_new_tokens or c["max_new_tokens"]
+        self.temperature = c["temperature"] if temperature is None else temperature
+        self.seed = c["sampling_seed"] if seed is None else seed
+        # GB of model weights vLLM may stream from host RAM instead of holding
+        # in VRAM -- lets a bf16 8B model (~16 GB) run on a GPU smaller than
+        # that (e.g. a 12 GB titan), at some latency cost. 0 = disabled.
+        self.cpu_offload_gb = (c.get("vllm_cpu_offload_gb", 0) if cpu_offload_gb is None
+                               else cpu_offload_gb)
+        # Pre-Volta GPUs (compute capability < 8.0 -- e.g. a Titan Xp is 6.1)
+        # can't run bfloat16 at all; vLLM raises immediately at engine init.
+        self.dtype = c.get("vllm_dtype", "bfloat16") if dtype is None else dtype
+        self._engine = None
+        self._sp = None
+        self._engine_error = None  # cached engine-init failure: fail fast, don't retry per row
+
+    # -- backend dispatch -------------------------------------------------
+    def _generate(self, messages):
+        if self.backend == "ollama":
+            return self._generate_ollama(messages)
+        if self.backend == "vllm":
+            return self._generate_vllm(messages)
+        raise ValueError(f"unknown backend {self.backend!r}")
+
+    def _generate_ollama(self, messages):
+        import requests
+        # Ollama's /api/generate is single-turn: it takes one "system" string
+        # and one "prompt" string, applying the model's own Modelfile template
+        # to slot them into the right roles. Send SYSTEM_PROMPT via "system"
+        # rather than folding it into "prompt" -- otherwise the whole thing
+        # (system + rubric + schema + few-shot + record) lands in the user
+        # turn undifferentiated, and the instruct-tuned system/user split the
+        # model was trained on is never actually used.
+        system_content = "\n\n".join(m["content"] for m in messages if m["role"] == "system")
+        turn_content = "\n\n".join(m["content"] for m in messages if m["role"] != "system")
+        r = requests.post(
+            f"http://{os.environ.get('OLLAMA_HOST', '127.0.0.1:11434')}/api/generate",
+            json={"model": self.model_id, "system": system_content, "prompt": turn_content,
+                  "stream": False,
+                  # Modern Ollama constrains output to a JSON schema via `format`.
+                  "format": "json",
+                  "options": {"temperature": self.temperature, "seed": self.seed,
+                              "num_predict": self.max_new_tokens}},
+            timeout=180,
+        )
+        r.raise_for_status()
+        return r.json()["response"]
+
+    def _generate_vllm(self, messages):
+        if self._engine is None:
+            # Engine construction is expensive (tens of seconds) and, if the
+            # config is wrong for this GPU (wrong dtype, insufficient VRAM,
+            # ...), fails deterministically every time. Cache the failure so
+            # a whole batch doesn't re-attempt and re-fail it once per row.
+            if self._engine_error is not None:
+                raise self._engine_error
+            try:
+                self._build_vllm_engine()
+            except Exception as e:
+                self._engine_error = e
+                raise
+        try:
+            # Preferred: LLM.chat() applies the model's own chat template, so
+            # the system/user role split actually reaches the model instead
+            # of being flattened into one raw-completion string.
+            return self._engine.chat([messages], self._sp)[0].outputs[0].text
+        except AttributeError:
+            # Older vLLM without LLM.chat() -- apply the template ourselves
+            # rather than silently falling back to an untemplated prompt.
+            tokenizer = self._engine.get_tokenizer()
+            prompt = tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True)
+            return self._engine.generate([prompt], self._sp)[0].outputs[0].text
+
+    def _build_vllm_engine(self):
+        from vllm import LLM, SamplingParams
+        engine_kw = dict(model=self.model_id, dtype=self.dtype,
+                         max_model_len=4096, gpu_memory_utilization=0.90)
+        if self.cpu_offload_gb:
+            engine_kw["cpu_offload_gb"] = self.cpu_offload_gb
+            try:
+                self._engine = LLM(**engine_kw)
+            except TypeError:
+                # Older vLLM without cpu_offload_gb -- retry without it rather
+                # than silently running out of VRAM with no explanation.
+                print("[llm_triage_client] this vLLM build has no cpu_offload_gb; "
+                      "retrying without offload (may OOM on a small GPU)", flush=True)
+                del engine_kw["cpu_offload_gb"]
+                self._engine = LLM(**engine_kw)
+        else:
+            self._engine = LLM(**engine_kw)
+        kw = dict(temperature=self.temperature, seed=self.seed,
+                  max_tokens=self.max_new_tokens)
+        try:
+            # Newer vLLM: constrain decoding to the schema; older builds lack this.
+            from vllm.sampling_params import GuidedDecodingParams
+            self._sp = SamplingParams(
+                guided_decoding=GuidedDecodingParams(json=ARBITRATION_SCHEMA_V1), **kw)
+        except (ImportError, TypeError):
+            self._sp = SamplingParams(**kw)
+
+    # -- public API -----------------------------------------------------
+    def arbitrate(self, context_str):
+        messages = build_messages(context_str)
+        raw = self._generate(messages)
+        try:
+            obj = _try_parse(raw)
+            obj.update({"parse_status": "ok", "raw": raw})
+            return obj
+        except (ValueError, ValidationError, json.JSONDecodeError):
+            pass
+
+        repair_messages = messages + [
+            {"role": "assistant", "content": raw},
+            {"role": "user", "content": "Your previous output was invalid. Return ONLY a "
+             "single valid JSON object matching the schema, nothing else."},
+        ]
+        raw2 = self._generate(repair_messages)
+        try:
+            obj = _try_parse(raw2)
+            obj.update({"parse_status": "repaired", "raw": raw2})
+            return obj
+        except (ValueError, ValidationError, json.JSONDecodeError):
+            out = dict(_EMPTY)
+            out.update({"parse_status": "parse_error", "raw": raw2})
+            return out
