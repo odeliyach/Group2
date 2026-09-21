@@ -1,0 +1,16 @@
+CAM-LDS Few-Shot 2 Arbitration Results (IN PROGRESS)
+
+=======================================================
+Model: Foundation-Sec (Few-Shot 2)
+Total valid rows processed so far: 390
+CNN actual votes: MALICIOUS=390 (100.0%), BENIGN=0 (0.0%)
+LLM verdicts:     MALICIOUS=389 (99.7%), BENIGN=1 (0.3%)
+Agrees with CNN:  389/390 (99.7%)
+Agrees with XGB:  1/390 (0.3%)
+=======================================================
+Model: Llama 3.1 (Few-Shot 2)
+Total valid rows processed so far: 400
+CNN actual votes: MALICIOUS=400 (100.0%), BENIGN=0 (0.0%)
+LLM verdicts:     MALICIOUS=400 (100.0%), BENIGN=0 (0.0%)
+Agrees with CNN:  400/400 (100.0%)
+Agrees with XGB:  0/400 (0.0%)
