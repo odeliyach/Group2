@@ -1,0 +1,5 @@
+# Cluster-only extras for the LLM triage layer (heavy; not needed to run the tests
+# or the CPU pipeline). Install on the GPU node alongside src/requirements.txt.
+vllm
+transformers
+accelerate

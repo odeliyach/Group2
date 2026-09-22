@@ -1,0 +1,16 @@
+CASINO Few-Shot 2 Arbitration Results
+
+=======================================================
+Model: Foundation-Sec (Few-Shot 2)
+Total valid rows: 392
+CNN actual votes: MALICIOUS=179 (45.7%), BENIGN=213 (54.3%)
+LLM verdicts:     MALICIOUS=392 (100.0%), BENIGN=0 (0.0%)
+Agrees with CNN:  183/392 (46.7%)
+Agrees with XGB:  213/392 (54.3%)
+=======================================================
+Model: Llama 3.1 (Few-Shot 2)
+Total valid rows: 397
+CNN actual votes: MALICIOUS=179 (45.1%), BENIGN=218 (54.9%)
+LLM verdicts:     MALICIOUS=393 (99.0%), BENIGN=4 (1.0%)
+Agrees with CNN:  397/397 (100.0%)
+Agrees with XGB:  218/397 (54.9%)
