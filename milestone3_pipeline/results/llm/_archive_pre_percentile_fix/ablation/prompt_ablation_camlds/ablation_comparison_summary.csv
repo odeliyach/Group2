@@ -1,0 +1,5 @@
+Variant,Total Evaluated,Malicious Bias (%),CNN Agreement (%),XGBoost Agreement (%),Accuracy vs GT (%)
+Full Prompt (Baseline),100,100.0,100.0,0.0,30.0
+No Few-Shot,98,100.0,100.0,0.0,29.6
+No Failure Patterns,100,100.0,100.0,0.0,30.0
+CNN-First Order,100,100.0,100.0,0.0,30.0

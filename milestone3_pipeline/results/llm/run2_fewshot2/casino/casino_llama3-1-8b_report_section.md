@@ -1,17 +1,17 @@
 ### LLM arbitration -- casino / llama3-1-8b
 
-- Contradiction rows scored: 397 (parse-failure rate 0.0%)
+- Contradiction rows scored: 355 (parse-failure rate 0.0%)
 
 **Accuracy on the contradiction set**
 
 | strategy             |   n |   accuracy |   precision |   recall |       f1 |
 |:---------------------|----:|-----------:|------------:|---------:|---------:|
-| llm                  | 397 |   0.959698 |    0.969466 | 0.98961  | 0.979434 |
-| always_xgb           | 397 |   0.564232 |    0.986239 | 0.558442 | 0.713101 |
-| always_cnn           | 397 |   0.435768 |    0.949721 | 0.441558 | 0.602837 |
-| trust_more_confident | 397 |   0.959698 |    0.974293 | 0.984416 | 0.979328 |
-| blend_at_0.5         | 397 |   0.974811 |    0.974684 | 1        | 0.987179 |
-| majority_class       | 397 |   0.969773 |    0.969773 | 1        | 0.984655 |
+| llm                  | 355 |   0.966197 |    0.966197 | 1        | 0.982808 |
+| always_xgb           | 355 |   0.597183 |    0.985437 | 0.591837 | 0.739526 |
+| always_cnn           | 355 |   0.402817 |    0.939597 | 0.408163 | 0.569106 |
+| trust_more_confident | 355 |   0.957746 |    0.971264 | 0.985423 | 0.978292 |
+| blend_at_0.5         | 355 |   0.971831 |    0.971671 | 1        | 0.985632 |
+| majority_class       | 355 |   0.966197 |    0.966197 | 1        | 0.982808 |
 
 **Whole-population pipeline effect (per-fold + pooled)**
 
@@ -28,13 +28,13 @@ _`cascade@0.5thr` mirrors `hybrid_cascade.cascade_predict` exactly (0.5/0.5 blen
 | cascade@0.5thr | 3      | 0.998799 | 1        | 0.00732218 |
 | cascade+llm    | 3      | 0.998799 | 1        | 0.00732218 |
 | cascade@0.5thr | 4      | 1        | 1        | 0          |
-| cascade+llm    | 4      | 0.999312 | 0.998626 | 0          |
+| cascade+llm    | 4      | 1        | 1        | 0          |
 | cascade@0.5thr | pooled | 0.99018  | 0.995922 | 0.00323688 |
-| cascade+llm    | pooled | 0.990154 | 0.996432 | 0.00335531 |
+| cascade+llm    | pooled | 0.990281 | 0.996686 | 0.00335531 |
 
-- Delta vs baseline (pooled): F1 -0.0000, recall +0.0005, FPR +0.0001
+- Delta vs baseline (pooled): F1 +0.0001, recall +0.0008, FPR +0.0001
 
 **Reasoning quality**
 
-- Expected Calibration Error: 0.0157
+- Expected Calibration Error: 0.0384
 - key_features intersect the dataset's error-analysis discriminators in 100.0% of scored rows

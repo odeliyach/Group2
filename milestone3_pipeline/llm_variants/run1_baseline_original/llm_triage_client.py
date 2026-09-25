@@ -84,8 +84,8 @@ class LLMClient:
                   # Modern Ollama constrains output to a JSON schema via `format`.
                   "format": ARBITRATION_SCHEMA_V1,
                   "options": {"temperature": self.temperature, "seed": self.seed,
-                              "num_predict": self.max_new_tokens}},
-            timeout=600,
+                              "num_predict": 800,
+            timeout=600
         )
         r.raise_for_status()
         return r.json()["response"]

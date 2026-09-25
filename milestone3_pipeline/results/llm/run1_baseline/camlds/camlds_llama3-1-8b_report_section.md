@@ -1,17 +1,17 @@
 ### LLM arbitration -- camlds / llama3-1-8b
 
-- Contradiction rows scored: 400 (parse-failure rate 0.0%)
+- Contradiction rows scored: 387 (parse-failure rate 0.0%)
 
 **Accuracy on the contradiction set**
 
 | strategy             |   n |   accuracy |   precision |   recall |       f1 |
 |:---------------------|----:|-----------:|------------:|---------:|---------:|
-| llm                  | 400 |     0.29   |    0.288221 |        1 | 0.447471 |
-| always_xgb           | 400 |     0.7125 |    0        |        0 | 0        |
-| always_cnn           | 400 |     0.2875 |    0.2875   |        1 | 0.446602 |
-| trust_more_confident | 400 |     0.2875 |    0.2875   |        1 | 0.446602 |
-| blend_at_0.5         | 400 |     0.2875 |    0.2875   |        1 | 0.446602 |
-| majority_class       | 400 |     0.7125 |    0        |        0 | 0        |
+| llm                  | 387 |   0.307494 |    0.286104 | 0.945946 | 0.439331 |
+| always_xgb           | 387 |   0.713178 |    0        | 0        | 0        |
+| always_cnn           | 387 |   0.286822 |    0.286822 | 1        | 0.445783 |
+| trust_more_confident | 387 |   0.286822 |    0.286822 | 1        | 0.445783 |
+| blend_at_0.5         | 387 |   0.286822 |    0.286822 | 1        | 0.445783 |
+| majority_class       | 387 |   0.713178 |    0        | 0        | 0        |
 
 **Whole-population pipeline effect (per-fold + pooled)**
 
@@ -26,15 +26,15 @@ _`cascade@0.5thr` mirrors `hybrid_cascade.cascade_predict` exactly (0.5/0.5 blen
 | cascade@0.5thr | 2      | 0.3678   | 0.998376 | 1         |
 | cascade+llm    | 2      | 0.3678   | 0.998376 | 1         |
 | cascade@0.5thr | 3      | 0.817191 | 0.724736 | 0.0193745 |
-| cascade+llm    | 3      | 0.817191 | 0.724736 | 0.0193745 |
+| cascade+llm    | 3      | 0.816853 | 0.724077 | 0.0192876 |
 | cascade@0.5thr | 4      | 0.558601 | 0.859245 | 0.481498  |
-| cascade+llm    | 4      | 0.558601 | 0.859245 | 0.481498  |
+| cascade+llm    | 4      | 0.558771 | 0.858586 | 0.480455  |
 | cascade@0.5thr | pooled | 0.670553 | 0.915248 | 0.327249  |
-| cascade+llm    | pooled | 0.670562 | 0.915248 | 0.327234  |
+| cascade+llm    | pooled | 0.670573 | 0.915017 | 0.327033  |
 
-- Delta vs baseline (pooled): F1 +0.0000, recall +0.0000, FPR -0.0000
+- Delta vs baseline (pooled): F1 +0.0000, recall -0.0002, FPR -0.0002
 
 **Reasoning quality**
 
-- Expected Calibration Error: 0.6316
+- Expected Calibration Error: 0.6027
 - key_features intersect the dataset's error-analysis discriminators in 100.0% of scored rows

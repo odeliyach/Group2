@@ -27,9 +27,20 @@ def compute_percentile_tables(df, feat_cols, label_col):
 
 def percentile_label(value, breakpoints):
     """breakpoints: ascending list of the p1..p99 values. Returns 'p1-', 'pN'
-    (2<=N<=98), or 'p99+'."""
+    (2<=N<=98), or 'p99+'.
+
+    FIX (percentile-tie bug, see report Appendix C / Limitation of the
+    context renderer): the original version used searchsorted(side="right"),
+    which sends a value equal to a whole block of identical breakpoints
+    (e.g. a near-constant feature whose 99 breakpoints are all 0) to the
+    TOP of that block -- mislabeling the most common, most ordinary value
+    as "p99+" (maximally atypical). This version uses the midpoint between
+    side="left" and side="right", so a tied value is labeled at the middle
+    of its tied block instead."""
     bp = np.asarray(breakpoints, dtype=float)
-    rank = int(np.searchsorted(bp, value, side="right"))  # 0..99
+    lo = int(np.searchsorted(bp, value, side="left"))
+    hi = int(np.searchsorted(bp, value, side="right"))
+    rank = int(round((lo + hi) / 2))
     if rank <= 0:
         return "p1-"
     if rank >= 99:
